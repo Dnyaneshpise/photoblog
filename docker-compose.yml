@@ -1,0 +1,25 @@
+# Local development database only.
+# Run: docker compose up -d
+# Stop: docker compose down
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: photoblog-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: photoblog
+      POSTGRES_PASSWORD: photoblog
+      POSTGRES_DB: photoblog
+    volumes:
+      - photoblog_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U photoblog -d photoblog"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  photoblog_pg_data:
