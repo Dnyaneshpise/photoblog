@@ -1,0 +1,19 @@
+// Photoblog Prisma schema
+// Day 1: placeholder so `prisma generate` can run later.
+// Day 2: full relational model (AdminUser, Photo, Collection, etc.)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Placeholder model so the schema is valid.
+// Real models are added in the Day 2 migration.
+model HealthCheck {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+}
