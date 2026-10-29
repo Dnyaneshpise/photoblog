@@ -1,10 +1,20 @@
-# Photoblog frontend on Netlify (monorepo: build from client/)
+# Photoblog frontend — Netlify
+# Base directory is set in the Netlify UI to "client" (do not also set base here
+# or the build path becomes client/client and fails).
+#
+# UI settings:
+#   Base directory:    client
+#   Build command:     npm install && npm run build
+#   Publish directory: dist
+
 [build]
-  base = "client"
   command = "npm install && npm run build"
   publish = "dist"
 
-# SPA routing — all paths serve index.html
+[build.environment]
+  NODE_VERSION = "22"
+
+# SPA: client-side routes fall back to index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
