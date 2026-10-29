@@ -1,0 +1,11 @@
+# Photoblog frontend on Netlify (monorepo: build from client/)
+[build]
+  base = "client"
+  command = "npm install && npm run build"
+  publish = "dist"
+
+# SPA routing — all paths serve index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
