@@ -14,70 +14,80 @@ photoblog/
 ├── client/          # Frontend (Vite + React + TypeScript + Tailwind)
 ├── server/          # Backend (Express + TypeScript + Prisma)
 ├── docker-compose.yml
+├── DEPLOY.md        # Live deployment guide (Vercel + Railway/Neon)
 ├── .env.example
 └── README.md
 ```
-
-Separate folders keep frontend and backend independent while sharing one repository.
 
 ---
 
 ## Prerequisites
 
 - Node.js 20+
-- Docker (for local PostgreSQL)
-- A free [Cloudinary](https://cloudinary.com) account (for image uploads)
+- Docker (local PostgreSQL) **or** a hosted Postgres (Neon/Railway)
+- Free [Cloudinary](https://cloudinary.com) account (uploads)
 
 ---
 
-## Quick start (Day 1 foundation)
+## Local setup
 
 ```bash
-# 1. Clone
 git clone https://github.com/Dnyaneshpise/photoblog.git
 cd photoblog
-
-# 2. Environment
 cp .env.example .env
-# Edit .env — at minimum set SESSION_SECRET and Cloudinary keys when you reach uploads
+# Set SESSION_SECRET (≥ 16 chars). Optional: ADMIN_EMAIL / ADMIN_PASSWORD for seed.
 
-# 3. Database
 docker compose up -d
 
-# 4. Backend
 cd server
 npm install
-npx prisma migrate dev   # after schema is added (Day 2)
+npx prisma migrate dev --name init
+npx prisma db seed
 npm run dev
 
-# 5. Frontend (new terminal)
+# new terminal
 cd client
 npm install
 npm run dev
 ```
 
-Frontend: http://localhost:5173  
-Backend:  http://localhost:4000
+- Frontend: http://localhost:5173  
+- API health: http://localhost:4000/api/health  
+
+Default seed admin: email/password from `.env` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`), or `admin@photoblog.local` / `changeme-please`.
+
+---
+
+## Live deployment
+
+See **[DEPLOY.md](./DEPLOY.md)** for a full walkthrough:
+
+- **Frontend** → Vercel (`client/`)
+- **API** → Railway or Render (`server/` + Dockerfile)
+- **Postgres** → Neon / Railway / Supabase
+- **Images** → Cloudinary
+
+After deploy: hit `/api/health`, run seed once, set `CLIENT_URL` to your Vercel domain.
 
 ---
 
 ## Development phases
 
-| Day | Focus |
-|-----|--------|
-| 1 | Foundation (this commit) |
-| 2 | Prisma schema, migrations, seed |
-| 3 | Backend core + public API |
-| 4 | Secure admin authentication |
-| 5 | Photo/collection management + Cloudinary |
-| 6 | Design system + homepage |
-| 7 | Gallery + photograph viewer |
-| 8 | Collections, About, Contact |
-| 9 | Admin interface |
-| 10 | Settings, polish, responsive |
-| 11 | Tests, docs, deployment readiness |
+| Day | Focus | Status |
+|-----|--------|--------|
+| 1 | Foundation (structure, design tokens) | Done |
+| 2 | Prisma schema, seed, deployment docs | Done |
+| 3 | Backend public API | Next |
+| 4 | Admin authentication | |
+| 5 | Photo/collection management + Cloudinary | |
+| 6 | Design system + homepage | |
+| 7 | Gallery + photograph viewer | |
+| 8 | Collections, About, Contact | |
+| 9 | Admin interface | |
+| 10 | Settings, polish, responsive | |
+| 11 | Tests & final deploy verification | |
 
-Every method in the codebase includes a short comment explaining why it exists and what it does — read the code to learn the stack.
+Every method includes a short comment explaining why it exists and what it does.
 
 ---
 
@@ -85,12 +95,11 @@ Every method in the codebase includes a short comment explaining why it exists a
 
 - Photographs are the product; the interface never competes with them.
 - Editorial typography, generous negative space, restrained color.
-- No generic dashboard aesthetics, glassmorphism, or decorative noise.
-- Mobile is designed intentionally, not merely shrunk.
+- No generic dashboard aesthetics or decorative noise.
+- Mobile is designed intentionally.
 
 ---
 
 ## License
 
-Private project of Dnyanesh Pise.  
-All rights reserved unless otherwise stated.
+Private project of Dnyanesh Pise. All rights reserved unless otherwise stated.
