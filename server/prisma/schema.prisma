@@ -1,6 +1,5 @@
-// Photoblog Prisma schema
-// Day 1: placeholder so `prisma generate` can run later.
-// Day 2: full relational model (AdminUser, Photo, Collection, etc.)
+// Photoblog — relational schema
+// Photographs are the product; every field exists to support gallery, collections, and admin workflows.
 
 generator client {
   provider = "prisma-client-js"
@@ -11,9 +10,122 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Placeholder model so the schema is valid.
-// Real models are added in the Day 2 migration.
-model HealthCheck {
-  id        Int      @id @default(autoincrement())
+/// Administrator account. Only one (or a few) users manage the portfolio.
+/// Passwords are stored as bcrypt hashes — never plaintext.
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("admin_users")
+}
+
+/// A single photograph. Image binaries live in Cloudinary; we store URLs + metadata here.
+model Photo {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  altText     String?  // accessibility alternative text
+  /// Full-resolution (or delivery) URL from Cloudinary
+  imageUrl    String
+  /// Smaller variant for gallery grids — reduces bandwidth on list views
+  thumbnailUrl String?
+  /// Cloudinary public_id so we can delete/transform later
+  storageKey  String?
+  width       Int?
+  height      Int?
+  location    String?
+  capturedAt  DateTime?
+  isFeatured  Boolean  @default(false)
+  isPublished Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  collections PhotoCollection[]
+
+  @@index([isPublished, isFeatured])
+  @@index([categoryId])
+  @@index([sortOrder])
+  @@map("photos")
+}
+
+/// Named group of photographs (Street, Nature, Portraits, etc.). Managed in admin — not hardcoded.
+model Collection {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?  @db.Text
+  coverPhotoId String?
+  isPublished Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  photos PhotoCollection[]
+
+  @@index([isPublished])
+  @@map("collections")
+}
+
+/// Join table: which photos belong to which collection, and in what order.
+model PhotoCollection {
+  id           String @id @default(cuid())
+  photoId      String
+  collectionId String
+  sortOrder    Int    @default(0)
+
+  photo      Photo      @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@unique([photoId, collectionId])
+  @@index([collectionId, sortOrder])
+  @@map("photo_collections")
+}
+
+/// Optional tag-like category for filtering the gallery.
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
   createdAt DateTime @default(now())
+
+  photos Photo[]
+
+  @@map("categories")
+}
+
+/// Site-wide settings (photographer name, bio, social links). Avoids hardcoding identity in the frontend.
+model PortfolioSettings {
+  id              String  @id @default(cuid())
+  photographerName String @default("Dnyanesh Pise")
+  tagline         String?
+  homepageIntro   String? @db.Text
+  biography       String? @db.Text
+  artistStatement String? @db.Text
+  profileImageUrl String?
+  contactEmail    String?
+  socialLinks     Json?   // { instagram, twitter, website, ... }
+  updatedAt       DateTime @updatedAt
+
+  @@map("portfolio_settings")
+}
+
+/// Messages submitted via the public contact form.
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("contact_messages")
 }
