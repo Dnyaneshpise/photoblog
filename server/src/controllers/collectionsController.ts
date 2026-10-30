@@ -3,6 +3,15 @@ import { prisma } from '../config/prisma.js'
 import { httpError } from '../middleware/errorHandler.js'
 
 /**
+ * Reads a single path param as a string.
+ * Why: Express types params as string | string[]; Prisma where needs string.
+ */
+function paramString(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) return value[0] ?? ''
+  return value ?? ''
+}
+
+/**
  * GET /api/collections
  * Why: Portfolio "series" navigation is driven by published collections, not hardcoded sections.
  * What: Returns published collections ordered by sortOrder, with cover photo when set.
@@ -36,7 +45,6 @@ export async function listCollections(_req: Request, res: Response): Promise<voi
     },
   })
 
-  // Prefer explicit coverPhotoId when present; otherwise first ordered photo.
   const data = await Promise.all(
     collections.map(async (collection) => {
       let cover = collection.photos[0]?.photo ?? null
@@ -78,7 +86,7 @@ export async function listCollections(_req: Request, res: Response): Promise<voi
  * What: Looks up by slug; 404 if missing or unpublished.
  */
 export async function getCollectionBySlug(req: Request, res: Response): Promise<void> {
-  const { slug } = req.params
+  const slug = paramString(req.params.slug)
 
   const collection = await prisma.collection.findFirst({
     where: { slug, isPublished: true },
@@ -101,6 +109,21 @@ export async function getCollectionBySlug(req: Request, res: Response): Promise<
     throw httpError(404, 'Collection not found')
   }
 
+  const photos = collection.photos.map((row) => ({
+    id: row.photo.id,
+    title: row.photo.title,
+    description: row.photo.description,
+    altText: row.photo.altText,
+    imageUrl: row.photo.imageUrl,
+    thumbnailUrl: row.photo.thumbnailUrl,
+    width: row.photo.width,
+    height: row.photo.height,
+    location: row.photo.location,
+    isFeatured: row.photo.isFeatured,
+    category: row.photo.category,
+    collectionSortOrder: row.sortOrder,
+  }))
+
   res.json({
     data: {
       id: collection.id,
@@ -108,10 +131,7 @@ export async function getCollectionBySlug(req: Request, res: Response): Promise<
       slug: collection.slug,
       description: collection.description,
       sortOrder: collection.sortOrder,
-      photos: collection.photos.map((row) => ({
-        ...row.photo,
-        collectionSortOrder: row.sortOrder,
-      })),
+      photos,
     },
   })
 }

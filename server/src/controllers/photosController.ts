@@ -15,6 +15,15 @@ const listQuerySchema = z.object({
 })
 
 /**
+ * Reads a single path param as a string.
+ * Why: Express types params as string | string[]; Prisma expects string.
+ */
+function paramString(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) return value[0] ?? ''
+  return value ?? ''
+}
+
+/**
  * GET /api/photos
  * Why: Powers the public gallery and homepage featured strip.
  * What: Returns only published photos, optional featured/category filters, paginated.
@@ -22,7 +31,6 @@ const listQuerySchema = z.object({
 export async function listPhotos(req: Request, res: Response): Promise<void> {
   const query = listQuerySchema.parse(req.query)
 
-  // Build Prisma where clause from validated query params.
   const where: {
     isPublished: boolean
     isFeatured?: boolean
@@ -41,7 +49,6 @@ export async function listPhotos(req: Request, res: Response): Promise<void> {
 
   const skip = (query.page - 1) * query.limit
 
-  // Parallel count + page fetch keeps the list endpoint fast.
   const [total, photos] = await Promise.all([
     prisma.photo.count({ where }),
     prisma.photo.findMany({
@@ -72,7 +79,7 @@ export async function listPhotos(req: Request, res: Response): Promise<void> {
  * What: Looks up by id; returns 404 if missing or not published (hides drafts).
  */
 export async function getPhotoById(req: Request, res: Response): Promise<void> {
-  const { id } = req.params
+  const id = paramString(req.params.id)
 
   const photo = await prisma.photo.findFirst({
     where: { id, isPublished: true },
@@ -98,7 +105,7 @@ export async function getPhotoById(req: Request, res: Response): Promise<void> {
 /**
  * GET /api/categories
  * Why: Gallery filters need the list of categories without hardcoding names in the UI.
- * What: Returns all categories ordered by name.
+ * What: Returns all categories ordered by name with published photo counts.
  */
 export async function listCategories(_req: Request, res: Response): Promise<void> {
   const categories = await prisma.category.findMany({
