@@ -38,7 +38,11 @@ export function AdminCollectionsPage() {
   async function onCreate(e: FormEvent) {
     e.preventDefault()
     try {
-      await apiPost('/api/admin/collections', { title, description: description || undefined, isPublished })
+      await apiPost('/api/admin/collections', {
+        title,
+        description: description || undefined,
+        isPublished,
+      })
       setTitle('')
       setDescription('')
       await load()
@@ -76,35 +80,71 @@ export function AdminCollectionsPage() {
       </h1>
       {error && <p className="text-sm text-red-700">{error}</p>}
 
-      <form onSubmit={onCreate} className="space-y-4 p-6 border border-[var(--color-border)] bg-[var(--color-surface)]">
-        <input required placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} className={field} />
-        <textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} className={field} rows={3} />
+      <form
+        onSubmit={onCreate}
+        className="space-y-4 p-6 border border-[var(--color-border)] bg-[var(--color-surface)]"
+      >
+        <input
+          required
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className={field}
+        />
+        <textarea
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className={field}
+          rows={3}
+        />
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={isPublished}
+            onChange={(e) => setIsPublished(e.target.checked)}
+          />
           Published
         </label>
-        <button type="submit" className="px-6 py-3 text-xs tracking-[0.16em] uppercase bg-[var(--color-ink)] text-[var(--color-canvas)]">
+        <button
+          type="submit"
+          className="px-6 py-3 text-xs tracking-[0.16em] uppercase bg-[var(--color-ink)] text-[var(--color-canvas)]"
+        >
           Add collection
         </button>
       </form>
 
       {loading ? (
         <p>Loading…</p>
-      co : (
+      ) : (
         <ul className="space-y-3">
           {items.map((item) => (
-            <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 p-4 border border-[var(--color-border)]">
+            <li
+              key={item.id}
+              className="flex flex-wrap items-center justify-between gap-3 p-4 border border-[var(--color-border)]"
+            >
               <div>
-                <p style={{ fontFamily: 'var(--font-display)' }} className="text-xl">{item.title}</p>
+                <p style={{ fontFamily: 'var(--font-display)' }} className="text-xl">
+                  {item.title}
+                </p>
                 <p className="text-xs text-[var(--color-ink-subtle)]">
-                  /{item.slug} · {item.photoCount} photos · {item.isPublished ? 'Published' : 'Draft'}
+                  /{item.slug} · {item.photoCount} photos ·{' '}
+                  {item.isPublished ? 'Published' : 'Draft'}
                 </p>
               </div>
               <div className="flex gap-3">
-                <button type="button" className="text-xs uppercase tracking-wider" onClick={() => void togglePublish(item)}>
+                <button
+                  type="button"
+                  className="text-xs uppercase tracking-wider"
+                  onClick={() => void togglePublish(item)}
+                >
                   Toggle publish
                 </button>
-                <button type="button" className="text-xs uppercase tracking-wider text-red-700" onClick={() => void remove(item.id)}>
+                <button
+                  type="button"
+                  className="text-xs uppercase tracking-wider text-red-700"
+                  onClick={() => void remove(item.id)}
+                >
                   Delete
                 </button>
               </div>
