@@ -15,9 +15,12 @@ import { errorHandler } from './middleware/errorHandler.js'
 export function createApp() {
   const app = express()
 
+  // Render terminates TLS; trust X-Forwarded-* so secure cookies work correctly.
+  app.set('trust proxy', 1)
+
   app.use(helmet())
 
-  // credentials: true is required for the admin session cookie cross-origin (Netlify → Render).
+  // credentials: true is required for the admin session cookie (Netlify → Render).
   app.use(
     cors({
       origin: env.CLIENT_URL,
@@ -26,17 +29,13 @@ export function createApp() {
   )
 
   app.use(express.json({ limit: '1mb' }))
-  // Signed cookies use SESSION_SECRET so the admin session cannot be forged.
   app.use(cookieParser(env.SESSION_SECRET))
 
   app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', service: 'photoblog-api', time: new Date().toISOString() })
   })
 
-  // Public read API + contact form.
   app.use('/api', publicRouter)
-
-  // Admin API (login is open; everything else uses requireAdmin).
   app.use('/api/admin', adminRouter)
 
   app.use('/api', (_req, res) => {

@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express'
+import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { prisma } from '../config/prisma.js'
 import { httpError } from '../middleware/errorHandler.js'
@@ -25,12 +26,24 @@ export async function adminGetSettings(_req: Request, res: Response): Promise<vo
 
 /**
  * PATCH /api/admin/settings — update site identity copy.
+ * Why: Admin can edit photographer bio without redeploying the frontend.
+ * What: Validates body; maps JSON null to Prisma.DbNull (required by Prisma Json fields).
  */
 export async function adminUpdateSettings(req: Request, res: Response): Promise<void> {
   const body = settingsBodySchema.parse(req.body)
 
   const existing = await prisma.portfolioSettings.findFirst({ orderBy: { updatedAt: 'desc' } })
   if (!existing) throw httpError(404, 'Portfolio settings not found')
+
+  // Prisma Json columns cannot take TypeScript `null` directly — use DbNull to clear.
+  let socialLinks: Prisma.InputJsonValue | typeof Prisma.DbNull | undefined
+  if (body.socialLinks === undefined) {
+    socialLinks = undefined
+  } else if (body.socialLinks === null) {
+    socialLinks = Prisma.DbNull
+  } else {
+    socialLinks = body.socialLinks
+  }
 
   const settings = await prisma.portfolioSettings.update({
     where: { id: existing.id },
@@ -42,7 +55,7 @@ export async function adminUpdateSettings(req: Request, res: Response): Promise<
       artistStatement: body.artistStatement === undefined ? undefined : body.artistStatement,
       profileImageUrl: body.profileImageUrl === undefined ? undefined : body.profileImageUrl,
       contactEmail: body.contactEmail === undefined ? undefined : body.contactEmail,
-      socialLinks: body.socialLinks === undefined ? undefined : body.socialLinks,
+      socialLinks,
     },
   })
 

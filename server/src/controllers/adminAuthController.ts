@@ -11,14 +11,21 @@ const loginSchema = z.object({
   password: z.string().min(1),
 })
 
-/** Session cookie options — httpOnly so JS cannot read it; secure in production. */
+/**
+ * Session cookie options.
+ * Why: Frontend (Netlify) and API (Render) are different sites, so the browser
+ *      only stores/sends the cookie if SameSite=None and Secure in production.
+ * What: httpOnly + signed cookie; 7-day lifetime.
+ */
 function sessionCookieOptions() {
+  const crossSite = env.NODE_ENV === 'production'
   return {
     httpOnly: true,
     signed: true,
-    sameSite: 'lax' as const,
-    secure: env.NODE_ENV === 'production',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    // Lax works on same-site; None is required for Netlify → Render credentialed fetch.
+    sameSite: crossSite ? ('none' as const) : ('lax' as const),
+    secure: crossSite,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
     path: '/',
   }
 }
@@ -33,7 +40,6 @@ export async function adminLogin(req: Request, res: Response): Promise<void> {
 
   const admin = await prisma.adminUser.findUnique({ where: { email: body.email } })
   if (!admin) {
-    // Same message whether email or password is wrong — avoids account enumeration.
     throw httpError(401, 'Invalid email or password')
   }
 
@@ -54,14 +60,15 @@ export async function adminLogin(req: Request, res: Response): Promise<void> {
 
 /**
  * POST /api/admin/auth/logout
- * Why: Clearing the cookie ends ends the session on this browser.
+ * Why: Clearing the cookie ends the session on this browser.
  */
 export async function adminLogout(_req: Request, res: Response): Promise<void> {
+  const crossSite = env.NODE_ENV === 'production'
   res.clearCookie(ADMIN_SESSION_COOKIE, {
     httpOnly: true,
     signed: true,
-    sameSite: 'lax',
-    secure: env.NODE_ENV === 'production',
+    sameSite: crossSite ? 'none' : 'lax',
+    secure: crossSite,
     path: '/',
   })
   res.json({ data: { ok: true } })
