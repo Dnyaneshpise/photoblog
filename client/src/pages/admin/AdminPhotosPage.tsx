@@ -25,7 +25,7 @@ type UploadPayload = {
 }
 
 /**
- * Admin photo list + create form with optional Cloudinary file upload.
+ * Admin photo list + create form with Cloudinary file upload (max 25MB).
  */
 export function AdminPhotosPage() {
   const [photos, setPhotos] = useState<AdminPhoto[]>([])
@@ -63,6 +63,13 @@ export function AdminPhotosPage() {
 
   async function onFileChange(file: File | null) {
     if (!file) return
+
+    const maxBytes = 25 * 1024 * 1024
+    if (file.size > maxBytes) {
+      setError('Image is too large. Maximum upload size is 25MB. Compress the photo first.')
+      return
+    }
+
     setUploading(true)
     setError(null)
     try {
@@ -144,7 +151,7 @@ export function AdminPhotosPage() {
           Photographs
         </h1>
         <p className="text-[var(--color-ink-muted)]">
-          Upload a file (Cloudinary) or paste an image URL, then save metadata.
+          Upload a file via Cloudinary (max 25MB) or paste an image URL, then save metadata.
         </p>
       </div>
 
@@ -156,7 +163,7 @@ export function AdminPhotosPage() {
       >
         <div className="space-y-2 md:col-span-2">
           <label className="text-xs tracking-[0.12em] uppercase text-[var(--color-ink-subtle)]">
-            Upload image
+            Upload image (JPEG, PNG, WebP, GIF · max 25MB)
           </label>
           <input
             type="file"
@@ -176,7 +183,7 @@ export function AdminPhotosPage() {
         </div>
         <div className="space-y-2 md:col-span-2">
           <label className="text-xs tracking-[0.12em] uppercase text-[var(--color-ink-subtle)]">
-            Image URL {imageUrl ? '(from upload or paste)' : ''}
+            Image URL
           </label>
           <input
             required

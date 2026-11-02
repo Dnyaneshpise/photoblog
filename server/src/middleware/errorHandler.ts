@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from 'express'
 import { ZodError } from 'zod'
+import { MulterError } from 'multer'
 
 /**
  * Shape of JSON error responses sent to the client.
@@ -13,7 +14,7 @@ export type ApiErrorBody = {
 /**
  * Central Express error middleware.
  * Why: Avoid scattering try/catch and status codes in every controller.
- * What: Maps known error types (Zod, not-found) to HTTP status codes and JSON bodies.
+ * What: Maps Zod, Multer, and domain errors to HTTP status codes and JSON bodies.
  */
 export function errorHandler(
   err: unknown,
@@ -21,7 +22,6 @@ export function errorHandler(
   res: Response,
   _next: NextFunction,
 ): void {
-  // Validation failures from Zod → 400 with field-level details.
   if (err instanceof ZodError) {
     res.status(400).json({
       error: 'Validation failed',
@@ -30,7 +30,20 @@ export function errorHandler(
     return
   }
 
-  // Controllers may attach statusCode for domain errors (e.g. 404).
+  // Multer rejects oversized or unexpected multipart fields before the controller runs.
+  if (err instanceof MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      res.status(400).json({
+        error: 'Image is too large. Maximum upload size is 25MB. Compress the photo or upload a smaller file.',
+      } satisfies ApiErrorBody)
+      return
+    }
+    res.status(400).json({
+      error: `Upload error: ${err.message}`,
+    } satisfies ApiErrorBody)
+    return
+  }
+
   if (err && typeof err === 'object' && 'statusCode' in err) {
     const statusCode = Number((err as { statusCode: number }).statusCode) || 500
     const message =
@@ -47,7 +60,6 @@ export function errorHandler(
 
 /**
  * Helper to throw an HTTP-aware error from controllers.
- * Why: Controllers stay readable: throw httpError(404, 'Photo not found').
  */
 export function httpError(statusCode: number, message: string): Error & { statusCode: number } {
   const error = new Error(message) as Error & { statusCode: number }

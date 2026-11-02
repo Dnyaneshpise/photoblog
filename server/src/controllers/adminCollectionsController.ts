@@ -3,7 +3,6 @@ import { z } from 'zod'
 import { prisma } from '../config/prisma.js'
 import { httpError } from '../middleware/errorHandler.js'
 
-/** Turns a title into a URL-safe slug. */
 function slugify(input: string): string {
   return input
     .toLowerCase()
@@ -34,10 +33,64 @@ export async function adminListCollections(_req: Request, res: Response): Promis
   })
   res.json({
     data: collections.map((c) => ({
-      ...c,
+      id: c.id,
+      title: c.title,
+      slug: c.slug,
+      description: c.description,
+      coverPhotoId: c.coverPhotoId,
+      isPublished: c.isPublished,
+      sortOrder: c.sortOrder,
+      createdAt: c.createdAt,
+      updatedAt: c.updatedAt,
       photoCount: c._count.photos,
-      _count: undefined,
     })),
+  })
+}
+
+/**
+ * GET /api/admin/collections/:id
+ * Why: Editor needs ordered photo membership when assigning images to a series.
+ */
+export async function adminGetCollection(req: Request, res: Response): Promise<void> {
+  const id = String(req.params.id)
+
+  const collection = await prisma.collection.findUnique({
+    where: { id },
+    include: {
+      photos: {
+        orderBy: { sortOrder: 'asc' },
+        include: {
+          photo: {
+            select: {
+              id: true,
+              title: true,
+              imageUrl: true,
+              thumbnailUrl: true,
+              isPublished: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!collection) throw httpError(404, 'Collection not found')
+
+  res.json({
+    data: {
+      id: collection.id,
+      title: collection.title,
+      slug: collection.slug,
+      description: collection.description,
+      coverPhotoId: collection.coverPhotoId,
+      isPublished: collection.isPublished,
+      sortOrder: collection.sortOrder,
+      photoIds: collection.photos.map((row) => row.photoId),
+      photos: collection.photos.map((row) => ({
+        ...row.photo,
+        collectionSortOrder: row.sortOrder,
+      })),
+    },
   })
 }
 
@@ -80,7 +133,6 @@ export async function adminUpdateCollection(req: Request, res: Response): Promis
   const existing = await prisma.collection.findUnique({ where: { id } })
   if (!existing) throw httpError(404, 'Collection not found')
 
-  // Replace membership if photoIds is provided.
   if (body.photoIds) {
     await prisma.photoCollection.deleteMany({ where: { collectionId: id } })
     if (body.photoIds.length > 0) {

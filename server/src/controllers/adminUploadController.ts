@@ -6,10 +6,11 @@ import {
   describeCloudinaryError,
 } from '../services/cloudinary.js'
 
+const MAX_UPLOAD_BYTES = 25 * 1024 * 1024
+
 /**
  * POST /api/admin/upload
  * Why: Admins need to attach real image files, not only paste remote URLs.
- * What: Accepts multipart field "file", uploads to Cloudinary, returns URLs + metadata.
  */
 export async function adminUploadImage(req: Request, res: Response): Promise<void> {
   if (!isCloudinaryConfigured()) {
@@ -29,9 +30,8 @@ export async function adminUploadImage(req: Request, res: Response): Promise<voi
     throw httpError(400, 'Only JPEG, PNG, WebP, or GIF images are allowed.')
   }
 
-  const maxBytes = 10 * 1024 * 1024
-  if (file.size > maxBytes) {
-    throw httpError(400, 'Image must be 10MB or smaller.')
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw httpError(400, 'Image is too large. Maximum upload size is 25MB.')
   }
 
   try {
@@ -42,7 +42,6 @@ export async function adminUploadImage(req: Request, res: Response): Promise<voi
     )
     res.status(201).json({ data: uploaded })
   } catch (err) {
-    // Prefer statusCode we attach in the service; otherwise map raw Cloudinary errors.
     if (err && typeof err === 'object' && 'statusCode' in err) {
       throw err
     }
