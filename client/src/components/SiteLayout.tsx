@@ -1,9 +1,10 @@
+import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 
 /**
- * Site-wide chrome: masthead, navigation, footer.
- * Why: Every public page shares the same editorial frame so content can stay quiet.
- * What: Renders nav links and an <Outlet /> for the active route.
+ * Site-wide chrome: masthead, responsive navigation, footer.
+ * Why: Every public page shares the same editorial frame.
  */
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   [
@@ -11,37 +12,76 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)]',
   ].join(' ')
 
+const links = [
+  { to: '/', label: 'Home', end: true },
+  { to: '/gallery', label: 'Gallery' },
+  { to: '/collections', label: 'Collections' },
+  { to: '/about', label: 'About' },
+  { to: '/contact', label: 'Contact' },
+] as const
+
 export function SiteLayout() {
+  const [menuOpen, setMenuOpen] = useState(false)
+
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="px-6 md:px-12 py-7 md:py-9 border-b border-[var(--color-border)]">
-        <div className="max-w-6xl mx-auto flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+      <header className="px-6 md:px-12 py-7 md:py-9 border-b border-[var(--color-border)] sticky top-0 z-40 bg-[var(--color-canvas)]/95 backdrop-blur-sm">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-6">
           <Link
             to="/"
             className="text-2xl md:text-[1.65rem] tracking-[0.04em] text-[var(--color-ink)]"
             style={{ fontFamily: 'var(--font-display)' }}
+            onClick={() => setMenuOpen(false)}
           >
             Photoblog
           </Link>
 
-          <nav className="flex flex-wrap gap-x-8 gap-y-3" aria-label="Primary">
-            <NavLink to="/" end className={navLinkClass}>
-              Home
-            </NavLink>
-            <NavLink to="/gallery" className={navLinkClass}>
-              Gallery
-            </NavLink>
-            <NavLink to="/collections" className={navLinkClass}>
-              Collections
-            </NavLink>
-            <NavLink to="/about" className={navLinkClass}>
-              About
-            </NavLink>
-            <NavLink to="/contact" className={navLinkClass}>
-              Contact
-            </NavLink>
+          {/* Desktop nav */}
+          <nav className="hidden md:flex flex-wrap gap-x-8 gap-y-3" aria-label="Primary">
+            {links.map((link) => (
+              <NavLink key={link.to} to={link.to} end={'end' in link ? link.end : false} className={navLinkClass}>
+                {link.label}
+              </NavLink>
+            ))}
           </nav>
+
+          {/* Mobile menu toggle */}
+          <button
+            type="button"
+            className="md:hidden text-xs tracking-[0.16em] uppercase text-[var(--color-ink-muted)]"
+            aria-expanded={menuOpen}
+            aria-controls="mobile-nav"
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            {menuOpen ? 'Close' : 'Menu'}
+          </button>
         </div>
+
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.nav
+              id="mobile-nav"
+              className="md:hidden max-w-6xl mx-auto pt-6 flex flex-col gap-4"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              aria-label="Mobile"
+            >
+              {links.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  end={'end' in link ? link.end : false}
+                  className={navLinkClass}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </motion.nav>
+          )}
+        </AnimatePresence>
       </header>
 
       <main className="flex-1">

@@ -5,8 +5,7 @@ import { useApi } from '../hooks/useApi'
 import type { CategoriesResponse, PhotosResponse } from '../types/api'
 
 /**
- * Public gallery with optional category filter.
- * Why: Visitors should browse all published work without admin noise.
+ * Public gallery with category filters and lightbox-capable cards.
  */
 export function GalleryPage() {
   const [category, setCategory] = useState<string>('')
@@ -35,9 +34,7 @@ export function GalleryPage() {
     <div className="px-6 md:px-12 py-14 md:py-20">
       <div className="max-w-6xl mx-auto space-y-12">
         <header className="max-w-2xl space-y-4">
-          <p className="text-xs tracking-[0.22em] uppercase text-[var(--color-ink-subtle)]">
-            Gallery
-          </p>
+          <p className="text-xs tracking-[0.22em] uppercase text-[var(--color-ink-subtle)]">Gallery</p>
           <h1
             className="text-4xl md:text-5xl text-[var(--color-ink)]"
             style={{ fontFamily: 'var(--font-display)' }}
@@ -45,16 +42,12 @@ export function GalleryPage() {
             All photographs
           </h1>
           <p className="text-[var(--color-ink-muted)] leading-relaxed">
-            A living archive of published frames. Filter by category when you want a narrower path.
+            A living archive of published frames. Click any image for a larger view.
           </p>
         </header>
 
         <div className="flex flex-wrap gap-2">
-          <FilterChip
-            label="All"
-            active={!category}
-            onClick={() => setCategory('')}
-          />
+          <FilterChip label="All" active={!category} onClick={() => setCategory('')} />
           {cats.map((c) => (
             <FilterChip
               key={c.id}
@@ -72,7 +65,7 @@ export function GalleryPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12">
             {list.map((photo) => (
-              <PhotoCard key={photo.id} photo={photo} />
+              <PhotoCard key={photo.id} photo={photo} preferLightbox />
             ))}
           </div>
         )}

@@ -1,12 +1,10 @@
 /**
  * Global styles & design tokens for Photoblog.
- * Tailwind v4 uses @import "tailwindcss" instead of the old @tailwind directives.
- * Custom properties define the visual identity so every component stays consistent.
+ * Editorial, photography-first: warm canvas, restrained type, quiet motion.
  */
 
 @import "tailwindcss";
 
-/* ---------- Design tokens (photography-focused, editorial) ---------- */
 @theme {
   --color-canvas: #f7f5f2;
   --color-surface: #ffffff;
@@ -52,6 +50,11 @@ img {
   display: block;
 }
 
+::selection {
+  background: #1a1a1a;
+  color: #f7f5f2;
+}
+
 :focus-visible {
   outline: 2px solid var(--color-ink);
   outline-offset: 3px;
@@ -59,4 +62,20 @@ img {
 
 button {
   font-family: inherit;
+  cursor: pointer;
+}
+
+/* Respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

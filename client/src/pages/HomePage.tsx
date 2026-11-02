@@ -1,13 +1,12 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { PhotoCard } from '../components/PhotoCard'
 import { StateBlock } from '../components/StateBlock'
 import { useApi } from '../hooks/useApi'
 import type { PhotosResponse, SettingsResponse } from '../types/api'
 
 /**
- * Editorial homepage.
- * Why: First impression should be photography-led: quiet intro + featured frames.
- * What: Loads portfolio settings and featured published photos from the API.
+ * Editorial homepage — photography-led intro and featured frames.
  */
 export function HomePage() {
   const settings = useApi<SettingsResponse>('/api/settings')
@@ -31,9 +30,13 @@ export function HomePage() {
 
   return (
     <div>
-      {/* Hero — type-led, generous space */}
-      <section className="px-6 md:px-12 pt-16 md:pt-24 pb-14 md:pb-20">
-        <div className="max-w-3xl mx-auto text-center space-y-8">
+      <section className="px-6 md:px-12 pt-16 md:pt-28 pb-14 md:pb-20">
+        <motion.div
+          className="max-w-3xl mx-auto text-center space-y-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
           <p className="text-xs tracking-[0.22em] uppercase text-[var(--color-ink-subtle)]">
             {profile?.photographerName ?? 'Photoblog'}
           </p>
@@ -62,10 +65,9 @@ export function HomePage() {
               Collections
             </Link>
           </div>
-        </div>
+        </motion.div>
       </section>
 
-      {/* Featured work */}
       <section className="px-6 md:px-12 pb-20 md:pb-28">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-end justify-between gap-4 mb-10">
@@ -88,7 +90,7 @@ export function HomePage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12">
               {photos.map((photo) => (
-                <PhotoCard key={photo.id} photo={photo} emphasis />
+                <PhotoCard key={photo.id} photo={photo} emphasis preferLightbox />
               ))}
             </div>
           )}
