@@ -9,9 +9,18 @@ import { z } from 'zod'
  * What: Reads .env from server/ and repo root, validates with Zod, exports typed config.
  */
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-// Prefer server/.env, fall back to monorepo root .env
 loadEnv({ path: path.resolve(__dirname, '../../.env') })
 loadEnv({ path: path.resolve(__dirname, '../../../.env') })
+
+/** Trim optional strings so pasted secrets with trailing newlines still work. */
+const optionalTrimmed = z
+  .string()
+  .optional()
+  .transform((v) => {
+    if (v === undefined) return undefined
+    const t = v.trim()
+    return t.length ? t : undefined
+  })
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -21,10 +30,13 @@ const envSchema = z.object({
   SESSION_SECRET: z.string().min(16, 'SESSION_SECRET must be at least 16 characters'),
   ADMIN_EMAIL: z.string().email().optional(),
   ADMIN_PASSWORD: z.string().min(8).optional(),
-  CLOUDINARY_CLOUD_NAME: z.string().optional(),
-  CLOUDINARY_API_KEY: z.string().optional(),
-  CLOUDINARY_API_SECRET: z.string().optional(),
-  CLOUDINARY_FOLDER: z.string().default('photoblog'),
+  CLOUDINARY_CLOUD_NAME: optionalTrimmed,
+  CLOUDINARY_API_KEY: optionalTrimmed,
+  CLOUDINARY_API_SECRET: optionalTrimmed,
+  CLOUDINARY_FOLDER: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.trim() ? v.trim() : 'photoblog')),
 })
 
 const parsed = envSchema.safeParse(process.env)

@@ -1,6 +1,10 @@
 import type { Request, Response } from 'express'
 import { httpError } from '../middleware/errorHandler.js'
-import { isCloudinaryConfigured, uploadImageBuffer } from '../services/cloudinary.js'
+import {
+  isCloudinaryConfigured,
+  uploadImageBuffer,
+  describeCloudinaryError,
+} from '../services/cloudinary.js'
 
 /**
  * POST /api/admin/upload
@@ -11,7 +15,7 @@ export async function adminUploadImage(req: Request, res: Response): Promise<voi
   if (!isCloudinaryConfigured()) {
     throw httpError(
       503,
-      'Cloudinary is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.',
+      'Cloudinary is not configured. On Render, set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET from the Cloudinary console → Account → API Keys.',
     )
   }
 
@@ -25,13 +29,24 @@ export async function adminUploadImage(req: Request, res: Response): Promise<voi
     throw httpError(400, 'Only JPEG, PNG, WebP, or GIF images are allowed.')
   }
 
-  // Soft limit — Cloudinary free tier and API body size.
   const maxBytes = 10 * 1024 * 1024
   if (file.size > maxBytes) {
     throw httpError(400, 'Image must be 10MB or smaller.')
   }
 
-  const uploaded = await uploadImageBuffer(file.buffer, file.originalname || 'photo')
-
-  res.status(201).json({ data: uploaded })
+  try {
+    const uploaded = await uploadImageBuffer(
+      file.buffer,
+      file.originalname || 'photo.jpg',
+      file.mimetype,
+    )
+    res.status(201).json({ data: uploaded })
+  } catch (err) {
+    // Prefer statusCode we attach in the service; otherwise map raw Cloudinary errors.
+    if (err && typeof err === 'object' && 'statusCode' in err) {
+      throw err
+    }
+    const described = describeCloudinaryError(err)
+    throw httpError(described.status, described.message)
+  }
 }
