@@ -1,5 +1,5 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react'
-import { apiDelete, apiGet, apiPatch, apiPost, ApiError } from '../../lib/api'
+import { apiDelete, apiGet, apiPatch, apiPost, apiUpload, ApiError } from '../../lib/api'
 
 type AdminPhoto = {
   id: string
@@ -14,8 +14,18 @@ type AdminPhoto = {
   location: string | null
 }
 
+type UploadPayload = {
+  data: {
+    imageUrl: string
+    thumbnailUrl: string
+    storageKey: string
+    width: number | null
+    height: number | null
+  }
+}
+
 /**
- * Admin photo list + create/edit form (image by URL until Cloudinary upload ships).
+ * Admin photo list + create form with optional Cloudinary file upload.
  */
 export function AdminPhotosPage() {
   const [photos, setPhotos] = useState<AdminPhoto[]>([])
@@ -25,10 +35,14 @@ export function AdminPhotosPage() {
   const [title, setTitle] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
+  const [storageKey, setStorageKey] = useState('')
+  const [width, setWidth] = useState<number | null>(null)
+  const [height, setHeight] = useState<number | null>(null)
   const [description, setDescription] = useState('')
   const [isPublished, setIsPublished] = useState(true)
   const [isFeatured, setIsFeatured] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -47,6 +61,27 @@ export function AdminPhotosPage() {
     void load()
   }, [load])
 
+  async function onFileChange(file: File | null) {
+    if (!file) return
+    setUploading(true)
+    setError(null)
+    try {
+      const result = await apiUpload<UploadPayload>('/api/admin/upload', file)
+      setImageUrl(result.data.imageUrl)
+      setThumbnailUrl(result.data.thumbnailUrl)
+      setStorageKey(result.data.storageKey)
+      setWidth(result.data.width)
+      setHeight(result.data.height)
+      if (!title) {
+        setTitle(file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '))
+      }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Upload failed')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   async function onCreate(e: FormEvent) {
     e.preventDefault()
     setSaving(true)
@@ -56,6 +91,9 @@ export function AdminPhotosPage() {
         title,
         imageUrl,
         thumbnailUrl: thumbnailUrl || undefined,
+        storageKey: storageKey || undefined,
+        width: width ?? undefined,
+        height: height ?? undefined,
         description: description || undefined,
         isPublished,
         isFeatured,
@@ -63,6 +101,9 @@ export function AdminPhotosPage() {
       setTitle('')
       setImageUrl('')
       setThumbnailUrl('')
+      setStorageKey('')
+      setWidth(null)
+      setHeight(null)
       setDescription('')
       setIsPublished(true)
       setIsFeatured(false)
@@ -103,24 +144,47 @@ export function AdminPhotosPage() {
           Photographs
         </h1>
         <p className="text-[var(--color-ink-muted)]">
-          Add images by URL for now. Cloudinary upload can replace this later.
+          Upload a file (Cloudinary) or paste an image URL, then save metadata.
         </p>
       </div>
 
       {error && <p className="text-sm text-red-700">{error}</p>}
 
-      <form onSubmit={onCreate} className="grid md:grid-cols-2 gap-4 p-6 border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <form
+        onSubmit={onCreate}
+        className="grid md:grid-cols-2 gap-4 p-6 border border-[var(--color-border)] bg-[var(--color-surface)]"
+      >
+        <div className="space-y-2 md:col-span-2">
+          <label className="text-xs tracking-[0.12em] uppercase text-[var(--color-ink-subtle)]">
+            Upload image
+          </label>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            onChange={(e) => void onFileChange(e.target.files?.[0] ?? null)}
+            className="block w-full text-sm"
+          />
+          {uploading && <p className="text-sm text-[var(--color-ink-muted)]">Uploading to Cloudinary…</p>}
+          {imageUrl && (
+            <img src={thumbnailUrl || imageUrl} alt="Preview" className="mt-2 max-h-40 object-contain" />
+          )}
+        </div>
+
         <div className="space-y-2 md:col-span-2">
           <label className="text-xs tracking-[0.12em] uppercase text-[var(--color-ink-subtle)]">Title</label>
           <input required value={title} onChange={(e) => setTitle(e.target.value)} className={field} />
         </div>
         <div className="space-y-2 md:col-span-2">
-          <label className="text-xs tracking-[0.12em] uppercase text-[var(--color-ink-subtle)]">Image URL</label>
-          <input required type="url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className={field} />
-        </div>
-        <div className="space-y-2 md:col-span-2">
-          <label className="text-xs tracking-[0.12em] uppercase text-[var(--color-ink-subtle)]">Thumbnail URL</label>
-          <input type="url" value={thumbnailUrl} onChange={(e) => setThumbnailUrl(e.target.value)} className={field} />
+          <label className="text-xs tracking-[0.12em] uppercase text-[var(--color-ink-subtle)]">
+            Image URL {imageUrl ? '(from upload or paste)' : ''}
+          </label>
+          <input
+            required
+            type="url"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            className={field}
+          />
         </div>
         <div className="space-y-2 md:col-span-2">
           <label className="text-xs tracking-[0.12em] uppercase text-[var(--color-ink-subtle)]">Description</label>
@@ -137,7 +201,7 @@ export function AdminPhotosPage() {
         <div className="md:col-span-2">
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || uploading || !imageUrl}
             className="px-6 py-3 text-xs tracking-[0.16em] uppercase bg-[var(--color-ink)] text-[var(--color-canvas)] disabled:opacity-60"
           >
             {saving ? 'Saving…' : 'Add photograph'}
