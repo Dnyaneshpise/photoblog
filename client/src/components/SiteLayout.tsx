@@ -1,15 +1,18 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
+import { IconClose, IconMenu } from './icons/PhotologIcons'
 
 /**
  * Site-wide chrome: masthead, responsive navigation, footer.
- * Why: Every public page shares the same editorial frame.
+ * Visual language: client/DESIGN.md
  */
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   [
     'text-sm tracking-[0.14em] uppercase transition-colors',
-    isActive ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)]',
+    isActive
+      ? 'text-[var(--color-ink)]'
+      : 'text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)]',
   ].join(' ')
 
 const links = [
@@ -36,24 +39,28 @@ export function SiteLayout() {
             Photoblog
           </Link>
 
-          {/* Desktop nav */}
           <nav className="hidden md:flex flex-wrap gap-x-8 gap-y-3" aria-label="Primary">
             {links.map((link) => (
-              <NavLink key={link.to} to={link.to} end={'end' in link ? link.end : false} className={navLinkClass}>
+              <NavLink
+                key={link.to}
+                to={link.to}
+                end={'end' in link ? link.end : false}
+                className={navLinkClass}
+              >
                 {link.label}
               </NavLink>
             ))}
           </nav>
 
-          {/* Mobile menu toggle */}
           <button
             type="button"
-            className="md:hidden text-xs tracking-[0.16em] uppercase text-[var(--color-ink-muted)]"
+            className="md:hidden flex items-center justify-center text-[var(--color-ink)] p-1"
             aria-expanded={menuOpen}
             aria-controls="mobile-nav"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             onClick={() => setMenuOpen((v) => !v)}
           >
-            {menuOpen ? 'Close' : 'Menu'}
+            {menuOpen ? <IconClose size={22} /> : <IconMenu size={22} />}
           </button>
         </div>
 
@@ -65,7 +72,7 @@ export function SiteLayout() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               aria-label="Mobile"
             >
               {links.map((link) => (
@@ -90,7 +97,10 @@ export function SiteLayout() {
 
       <footer className="px-6 md:px-12 py-8 border-t border-[var(--color-border)]">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-[var(--color-ink-subtle)]">
-          <p style={{ fontFamily: 'var(--font-display)' }} className="text-base tracking-wide text-[var(--color-ink-muted)]">
+          <p
+            style={{ fontFamily: 'var(--font-display)' }}
+            className="text-base tracking-wide text-[var(--color-ink-muted)]"
+          >
             Photoblog
           </p>
           <p>© {new Date().getFullYear()} · Photographs & site by Dnyanesh Pise</p>

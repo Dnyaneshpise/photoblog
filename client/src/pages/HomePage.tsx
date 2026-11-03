@@ -17,7 +17,7 @@ export function HomePage() {
   const collections = useApi<CollectionsResponse>('/api/collections')
 
   if (settings.loading || featured.loading) {
-    return <StateBlock title="Loading" detail="Gathering photographs…" />
+    return <StateBlock title="Loading" detail="Gathering photographs…" loading />
   }
 
   if (settings.error || featured.error) {
