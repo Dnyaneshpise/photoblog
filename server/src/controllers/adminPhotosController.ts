@@ -2,6 +2,7 @@ import type { Request, Response } from 'express'
 import { z } from 'zod'
 import { prisma } from '../config/prisma.js'
 import { httpError } from '../middleware/errorHandler.js'
+import { destroyImage } from '../services/cloudinary.js'
 
 const photoBodySchema = z.object({
   title: z.string().trim().min(1).max(200),
@@ -19,10 +20,6 @@ const photoBodySchema = z.object({
   categoryId: z.string().optional().nullable(),
 })
 
-/**
- * GET /api/admin/photos
- * Why: Admin list includes drafts; public list only shows published.
- */
 export async function adminListPhotos(_req: Request, res: Response): Promise<void> {
   const photos = await prisma.photo.findMany({
     orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
@@ -33,10 +30,6 @@ export async function adminListPhotos(_req: Request, res: Response): Promise<voi
   res.json({ data: photos })
 }
 
-/**
- * POST /api/admin/photos
- * Why: Create a photo row (image URL may come from Cloudinary or a temporary URL).
- */
 export async function adminCreatePhoto(req: Request, res: Response): Promise<void> {
   const body = photoBodySchema.parse(req.body)
 
@@ -64,10 +57,6 @@ export async function adminCreatePhoto(req: Request, res: Response): Promise<voi
   res.status(201).json({ data: photo })
 }
 
-/**
- * PATCH /api/admin/photos/:id
- * Why: Update metadata, publish state, or featured flag without recreating the row.
- */
 export async function adminUpdatePhoto(req: Request, res: Response): Promise<void> {
   const id = String(req.params.id)
   const body = photoBodySchema.partial().parse(req.body)
@@ -96,12 +85,16 @@ export async function adminUpdatePhoto(req: Request, res: Response): Promise<voi
 
 /**
  * DELETE /api/admin/photos/:id
- * Why: Remove a photograph from the portfolio (Cloudinary cleanup can be added later).
+ * Why: Remove portfolio row and, when possible, the Cloudinary binary.
  */
 export async function adminDeletePhoto(req: Request, res: Response): Promise<void> {
   const id = String(req.params.id)
   const existing = await prisma.photo.findUnique({ where: { id } })
   if (!existing) throw httpError(404, 'Photo not found')
+
+  if (existing.storageKey) {
+    await destroyImage(existing.storageKey)
+  }
 
   await prisma.photo.delete({ where: { id } })
   res.json({ data: { ok: true } })

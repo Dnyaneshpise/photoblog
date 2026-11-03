@@ -12,12 +12,10 @@ import { AdminLoginPage } from './pages/admin/AdminLoginPage'
 import { AdminLayout } from './pages/admin/AdminLayout'
 import { AdminPhotosPage } from './pages/admin/AdminPhotosPage'
 import { AdminCollectionsPage } from './pages/admin/AdminCollectionsPage'
+import { AdminCategoriesPage } from './pages/admin/AdminCategoriesPage'
 import { AdminSettingsPage } from './pages/admin/AdminSettingsPage'
 import { AdminMessagesPage } from './pages/admin/AdminMessagesPage'
 
-/**
- * Application routes: public site under SiteLayout, admin under its own shell.
- */
 export default function App() {
   return (
     <AdminAuthProvider>
@@ -36,6 +34,7 @@ export default function App() {
         <Route path="admin" element={<AdminLayout />}>
           <Route index element={<AdminPhotosPage />} />
           <Route path="collections" element={<AdminCollectionsPage />} />
+          <Route path="categories" element={<AdminCategoriesPage />} />
           <Route path="settings" element={<AdminSettingsPage />} />
           <Route path="messages" element={<AdminMessagesPage />} />
         </Route>

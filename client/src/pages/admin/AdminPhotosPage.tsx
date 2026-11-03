@@ -12,7 +12,11 @@ type AdminPhoto = {
   isPublished: boolean
   sortOrder: number
   location: string | null
+  categoryId: string | null
+  category: { id: string; name: string; slug: string } | null
 }
+
+type CategoryOption = { id: string; name: string; slug: string; photoCount: number }
 
 type UploadPayload = {
   data: {
@@ -24,11 +28,9 @@ type UploadPayload = {
   }
 }
 
-/**
- * Admin photo list + create form with Cloudinary file upload (max 25MB).
- */
 export function AdminPhotosPage() {
   const [photos, setPhotos] = useState<AdminPhoto[]>([])
+  const [categories, setCategories] = useState<CategoryOption[]>([])
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -39,6 +41,7 @@ export function AdminPhotosPage() {
   const [width, setWidth] = useState<number | null>(null)
   const [height, setHeight] = useState<number | null>(null)
   const [description, setDescription] = useState('')
+  const [categoryId, setCategoryId] = useState('')
   const [isPublished, setIsPublished] = useState(true)
   const [isFeatured, setIsFeatured] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -48,8 +51,12 @@ export function AdminPhotosPage() {
     setLoading(true)
     setError(null)
     try {
-      const result = await apiGet<{ data: AdminPhoto[] }>('/api/admin/photos')
-      setPhotos(result.data)
+      const [photosResult, catsResult] = await Promise.all([
+        apiGet<{ data: AdminPhoto[] }>('/api/admin/photos'),
+        apiGet<{ data: CategoryOption[] }>('/api/admin/categories'),
+      ])
+      setPhotos(photosResult.data)
+      setCategories(catsResult.data)
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to load photos')
     } finally {
@@ -63,13 +70,11 @@ export function AdminPhotosPage() {
 
   async function onFileChange(file: File | null) {
     if (!file) return
-
     const maxBytes = 25 * 1024 * 1024
     if (file.size > maxBytes) {
-      setError('Image is too large. Maximum upload size is 25MB. Compress the photo first.')
+      setError('Image is too large. Maximum upload size is 25MB.')
       return
     }
-
     setUploading(true)
     setError(null)
     try {
@@ -102,6 +107,7 @@ export function AdminPhotosPage() {
         width: width ?? undefined,
         height: height ?? undefined,
         description: description || undefined,
+        categoryId: categoryId || null,
         isPublished,
         isFeatured,
       })
@@ -112,6 +118,7 @@ export function AdminPhotosPage() {
       setWidth(null)
       setHeight(null)
       setDescription('')
+      setCategoryId('')
       setIsPublished(true)
       setIsFeatured(false)
       await load()
@@ -132,7 +139,7 @@ export function AdminPhotosPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm('Delete this photograph?')) return
+    if (!confirm('Delete this photograph? Cloudinary asset is removed when storageKey exists.')) return
     try {
       await apiDelete(`/api/admin/photos/${id}`)
       await load()
@@ -151,7 +158,7 @@ export function AdminPhotosPage() {
           Photographs
         </h1>
         <p className="text-[var(--color-ink-muted)]">
-          Upload a file via Cloudinary (max 25MB) or paste an image URL, then save metadata.
+          Upload (max 25MB), assign a category, publish, and feature on the homepage.
         </p>
       </div>
 
@@ -163,7 +170,7 @@ export function AdminPhotosPage() {
       >
         <div className="space-y-2 md:col-span-2">
           <label className="text-xs tracking-[0.12em] uppercase text-[var(--color-ink-subtle)]">
-            Upload image (JPEG, PNG, WebP, GIF · max 25MB)
+            Upload image
           </label>
           <input
             type="file"
@@ -171,7 +178,7 @@ export function AdminPhotosPage() {
             onChange={(e) => void onFileChange(e.target.files?.[0] ?? null)}
             className="block w-full text-sm"
           />
-          {uploading && <p className="text-sm text-[var(--color-ink-muted)]">Uploading to Cloudinary…</p>}
+          {uploading && <p className="text-sm text-[var(--color-ink-muted)]">Uploading…</p>}
           {imageUrl && (
             <img src={thumbnailUrl || imageUrl} alt="Preview" className="mt-2 max-h-40 object-contain" />
           )}
@@ -182,16 +189,19 @@ export function AdminPhotosPage() {
           <input required value={title} onChange={(e) => setTitle(e.target.value)} className={field} />
         </div>
         <div className="space-y-2 md:col-span-2">
-          <label className="text-xs tracking-[0.12em] uppercase text-[var(--color-ink-subtle)]">
-            Image URL
-          </label>
-          <input
-            required
-            type="url"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            className={field}
-          />
+          <label className="text-xs tracking-[0.12em] uppercase text-[var(--color-ink-subtle)]">Image URL</label>
+          <input required type="url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className={field} />
+        </div>
+        <div className="space-y-2 md:col-span-2">
+          <label className="text-xs tracking-[0.12em] uppercase text-[var(--color-ink-subtle)]">Category</label>
+          <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={field}>
+            <option value="">Uncategorized</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="space-y-2 md:col-span-2">
           <label className="text-xs tracking-[0.12em] uppercase text-[var(--color-ink-subtle)]">Description</label>
@@ -235,7 +245,9 @@ export function AdminPhotosPage() {
                   {photo.title}
                 </p>
                 <p className="text-xs text-[var(--color-ink-subtle)]">
-                  {photo.isPublished ? 'Published' : 'Draft'} · {photo.isFeatured ? 'Featured' : 'Not featured'}
+                  {photo.category?.name ?? 'Uncategorized'} ·{' '}
+                  {photo.isPublished ? 'Published' : 'Draft'} ·{' '}
+                  {photo.isFeatured ? 'Featured' : 'Not featured'}
                 </p>
                 <div className="flex flex-wrap gap-3 pt-1">
                   <button type="button" className="text-xs uppercase tracking-wider" onClick={() => void toggle(photo, 'isPublished')}>

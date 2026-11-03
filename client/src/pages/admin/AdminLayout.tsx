@@ -7,10 +7,6 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)]',
   ].join(' ')
 
-/**
- * Shell for authenticated admin pages.
- * Why: Shared nav + auth gate so individual pages stay focused on content.
- */
 export function AdminLayout() {
   const { admin, loading, logout } = useAdminAuth()
 
@@ -30,16 +26,19 @@ export function AdminLayout() {
     <div className="min-h-screen flex flex-col bg-[var(--color-canvas)]">
       <header className="border-b border-[var(--color-border)] px-6 md:px-10 py-5">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
             <Link to="/admin" className="text-xl" style={{ fontFamily: 'var(--font-display)' }}>
               Photoblog Admin
             </Link>
-            <nav className="flex flex-wrap gap-5">
+            <nav className="flex flex-wrap gap-4 sm:gap-5">
               <NavLink to="/admin" end className={linkClass}>
                 Photos
               </NavLink>
               <NavLink to="/admin/collections" className={linkClass}>
                 Collections
+              </NavLink>
+              <NavLink to="/admin/categories" className={linkClass}>
+                Categories
               </NavLink>
               <NavLink to="/admin/settings" className={linkClass}>
                 Settings

@@ -21,6 +21,12 @@ import {
   adminDeleteCollection,
 } from '../controllers/adminCollectionsController.js'
 import {
+  adminListCategories,
+  adminCreateCategory,
+  adminUpdateCategory,
+  adminDeleteCategory,
+} from '../controllers/adminCategoriesController.js'
+import {
   adminGetSettings,
   adminUpdateSettings,
   adminListMessages,
@@ -28,12 +34,8 @@ import {
 } from '../controllers/adminSettingsController.js'
 import { adminUploadImage } from '../controllers/adminUploadController.js'
 
-/**
- * Admin API routes.
- */
 const router = Router()
 
-/** 25MB — typical phone JPEGs; still within common proxy limits. */
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024
 
 const upload = multer({
@@ -57,6 +59,11 @@ router.get('/collections/:id', requireAdmin, asyncHandler(adminGetCollection))
 router.post('/collections', requireAdmin, asyncHandler(adminCreateCollection))
 router.patch('/collections/:id', requireAdmin, asyncHandler(adminUpdateCollection))
 router.delete('/collections/:id', requireAdmin, asyncHandler(adminDeleteCollection))
+
+router.get('/categories', requireAdmin, asyncHandler(adminListCategories))
+router.post('/categories', requireAdmin, asyncHandler(adminCreateCategory))
+router.patch('/categories/:id', requireAdmin, asyncHandler(adminUpdateCategory))
+router.delete('/categories/:id', requireAdmin, asyncHandler(adminDeleteCategory))
 
 router.get('/settings', requireAdmin, asyncHandler(adminGetSettings))
 router.patch('/settings', requireAdmin, asyncHandler(adminUpdateSettings))

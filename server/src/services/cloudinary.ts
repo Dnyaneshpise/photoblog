@@ -1,10 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary'
 import { env } from '../config/env.js'
 
-/**
- * Configures the Cloudinary SDK from environment variables.
- * Why: Image binaries should not live in Postgres or the API container.
- */
 export function isCloudinaryConfigured(): boolean {
   return Boolean(
     env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY && env.CLOUDINARY_API_SECRET,
@@ -30,10 +26,6 @@ export type UploadResult = {
   height: number | null
 }
 
-/**
- * Normalizes Cloudinary / network errors into a readable message + HTTP-ish code.
- * Why: Raw "UnexpectedResponse 403" is useless in the admin UI.
- */
 export function describeCloudinaryError(err: unknown): { message: string; status: number } {
   const anyErr = err as {
     message?: string
@@ -52,7 +44,7 @@ export function describeCloudinaryError(err: unknown): { message: string; status
     return {
       status: 502,
       message:
-        'Cloudinary rejected the upload (403/401). Check Render env vars: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET must match the API Keys page (not the cloudinary:// URL alone). Use an unrestricted key, confirm the product is Media / Image, and that the account is verified.',
+        'Cloudinary rejected the upload (403/401). Check Render env vars: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET must match the API Keys page. Use an unrestricted key and a verified account.',
     }
   }
 
@@ -63,10 +55,6 @@ export function describeCloudinaryError(err: unknown): { message: string; status
   return { status: 502, message: `Cloudinary: ${raw}` }
 }
 
-/**
- * Uploads an image buffer using signed API credentials.
- * Why: upload_stream 403s are hard to debug; data-URI upload uses the same signed API clearly.
- */
 export async function uploadImageBuffer(
   buffer: Buffer,
   filename: string,
@@ -108,5 +96,20 @@ export async function uploadImageBuffer(
     const error = new Error(described.message) as Error & { statusCode: number }
     error.statusCode = described.status
     throw error
+  }
+}
+
+/**
+ * Deletes an asset from Cloudinary by public_id (storageKey).
+ * Why: Removing a photo row should not leave orphaned binaries in the cloud.
+ * What: Best-effort destroy; failures are logged but do not block DB delete.
+ */
+export async function destroyImage(storageKey: string): Promise<void> {
+  if (!isCloudinaryConfigured() || !storageKey) return
+  configureCloudinary()
+  try {
+    await cloudinary.uploader.destroy(storageKey, { resource_type: 'image' })
+  } catch (err) {
+    console.error('[cloudinary] destroy failed', storageKey, err)
   }
 }
