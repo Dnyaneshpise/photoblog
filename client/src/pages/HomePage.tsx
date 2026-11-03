@@ -3,14 +3,18 @@ import { motion } from 'framer-motion'
 import { PhotoCard } from '../components/PhotoCard'
 import { StateBlock } from '../components/StateBlock'
 import { useApi } from '../hooks/useApi'
-import type { PhotosResponse, SettingsResponse } from '../types/api'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import type { CollectionsResponse, PhotosResponse, SettingsResponse } from '../types/api'
 
 /**
- * Editorial homepage — photography-led intro and featured frames.
+ * Editorial homepage — intro, featured frames, and published collections.
  */
 export function HomePage() {
+  useDocumentTitle('Photoblog — Dnyanesh Pise')
+
   const settings = useApi<SettingsResponse>('/api/settings')
   const featured = useApi<PhotosResponse>('/api/photos?featured=true&limit=6')
+  const collections = useApi<CollectionsResponse>('/api/collections')
 
   if (settings.loading || featured.loading) {
     return <StateBlock title="Loading" detail="Gathering photographs…" />
@@ -27,6 +31,7 @@ export function HomePage() {
 
   const profile = settings.data?.data
   const photos = featured.data?.data ?? []
+  const series = collections.data?.data ?? []
 
   return (
     <div>
@@ -68,7 +73,7 @@ export function HomePage() {
         </motion.div>
       </section>
 
-      <section className="px-6 md:px-12 pb-20 md:pb-28">
+      <section className="px-6 md:px-12 pb-16 md:pb-24">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-end justify-between gap-4 mb-10">
             <h2
@@ -96,6 +101,62 @@ export function HomePage() {
           )}
         </div>
       </section>
+
+      {!collections.loading && series.length > 0 && (
+        <section className="px-6 md:px-12 pb-20 md:pb-28 border-t border-[var(--color-border)] pt-16">
+          <div className="max-w-6xl mx-auto space-y-10">
+            <div className="flex items-end justify-between gap-4">
+              <h2
+                className="text-2xl md:text-3xl text-[var(--color-ink)]"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
+                Collections
+              </h2>
+              <Link
+                to="/collections"
+                className="text-xs tracking-[0.16em] uppercase text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)]"
+              >
+                View all
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              {series.slice(0, 4).map((collection) => (
+                <Link
+                  key={collection.id}
+                  to={`/collections/${collection.slug}`}
+                  className="group block space-y-4"
+                >
+                  <div className="overflow-hidden bg-[var(--color-border)] aspect-[3/2]">
+                    {collection.coverPhoto ? (
+                      <img
+                        src={collection.coverPhoto.thumbnailUrl || collection.coverPhoto.imageUrl}
+                        alt={collection.coverPhoto.altText || collection.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[var(--color-ink-subtle)] text-sm">
+                        No cover
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <h3
+                      className="text-2xl text-[var(--color-ink)]"
+                      style={{ fontFamily: 'var(--font-display)' }}
+                    >
+                      {collection.title}
+                    </h3>
+                    <p className="text-xs tracking-[0.14em] uppercase text-[var(--color-ink-subtle)] mt-1">
+                      {collection.publishedPhotoCount} photographs
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   )
 }

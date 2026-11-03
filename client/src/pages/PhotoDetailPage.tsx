@@ -1,21 +1,27 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { StateBlock } from '../components/StateBlock'
+import { Lightbox } from '../components/Lightbox'
 import { useApi } from '../hooks/useApi'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { PhotoResponse } from '../types/api'
 
 /**
- * Single photograph view.
- * Why: Give each image room — large presentation with caption and metadata.
+ * Single photograph view with series context and lightbox.
  */
 export function PhotoDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { data, error, loading } = useApi<PhotoResponse>(id ? `/api/photos/${id}` : null)
+  const [lightbox, setLightbox] = useState(false)
+
+  const photo = data?.data
+  useDocumentTitle(photo ? `${photo.title} — Photoblog` : 'Photograph — Photoblog')
 
   if (loading) return <StateBlock title="Loading" detail="Opening the frame…" />
   if (error) return <StateBlock title="Not found" detail={error} />
-
-  const photo = data?.data
   if (!photo) return <StateBlock title="Not found" detail="This photograph is unavailable." />
+
+  const series = photo.collections?.map((row) => row.collection) ?? []
 
   return (
     <div className="px-6 md:px-12 py-12 md:py-16">
@@ -28,13 +34,18 @@ export function PhotoDetailPage() {
         </Link>
 
         <figure className="space-y-8">
-          <div className="bg-[var(--color-border)]">
+          <button
+            type="button"
+            className="block w-full bg-[var(--color-border)] cursor-zoom-in"
+            onClick={() => setLightbox(true)}
+            aria-label={`Enlarge ${photo.title}`}
+          >
             <img
               src={photo.imageUrl}
               alt={photo.altText || photo.title}
               className="w-full max-h-[78vh] object-contain mx-auto"
             />
-          </div>
+          </button>
           <figcaption className="max-w-2xl space-y-4">
             <h1
               className="text-3xl md:text-4xl text-[var(--color-ink)]"
@@ -51,7 +62,11 @@ export function PhotoDetailPage() {
               {photo.category && (
                 <div>
                   <dt className="sr-only">Category</dt>
-                  <dd>{photo.category.name}</dd>
+                  <dd>
+                    <Link to={`/gallery?category=${photo.category.slug}`} className="hover:text-[var(--color-ink)]">
+                      {photo.category.name}
+                    </Link>
+                  </dd>
                 </div>
               )}
               {photo.location && (
@@ -61,9 +76,37 @@ export function PhotoDetailPage() {
                 </div>
               )}
             </dl>
+
+            {series.length > 0 && (
+              <div className="pt-4 space-y-2">
+                <p className="text-xs tracking-[0.14em] uppercase text-[var(--color-ink-subtle)]">
+                  In collections
+                </p>
+                <ul className="flex flex-wrap gap-3">
+                  {series.map((c) => (
+                    <li key={c.id}>
+                      <Link
+                        to={`/collections/${c.slug}`}
+                        className="text-sm border-b border-[var(--color-border)] hover:border-[var(--color-ink)]"
+                      >
+                        {c.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </figcaption>
         </figure>
       </div>
+
+      <Lightbox
+        open={lightbox}
+        src={photo.imageUrl}
+        alt={photo.altText || photo.title}
+        title={photo.title}
+        onClose={() => setLightbox(false)}
+      />
     </div>
   )
 }

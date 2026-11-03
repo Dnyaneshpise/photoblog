@@ -1,12 +1,10 @@
 import { StateBlock } from '../components/StateBlock'
 import { useApi } from '../hooks/useApi'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { SettingsResponse } from '../types/api'
 
-/**
- * About page driven entirely by portfolio settings from the API.
- * Why: Bio and statement should be editable later without redeploying the client.
- */
 export function AboutPage() {
+  useDocumentTitle('About — Photoblog')
   const { data, error, loading } = useApi<SettingsResponse>('/api/settings')
 
   if (loading) return <StateBlock title="Loading" detail="Reading the profile…" />
@@ -35,9 +33,7 @@ export function AboutPage() {
 
         {s.biography && (
           <section className="space-y-3">
-            <h2
-              className="text-sm tracking-[0.16em] uppercase text-[var(--color-ink-subtle)]"
-            >
+            <h2 className="text-sm tracking-[0.16em] uppercase text-[var(--color-ink-subtle)]">
               Biography
             </h2>
             <p className="text-lg text-[var(--color-ink-muted)] leading-relaxed whitespace-pre-line">

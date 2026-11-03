@@ -1,15 +1,24 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { PhotoCard } from '../components/PhotoCard'
 import { StateBlock } from '../components/StateBlock'
 import { useApi } from '../hooks/useApi'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { CategoriesResponse, PhotosResponse } from '../types/api'
 
 /**
- * Public gallery with category filters and lightbox-capable cards.
+ * Public gallery with category filters (supports ?category=slug from deep links).
  */
 export function GalleryPage() {
-  const [category, setCategory] = useState<string>('')
+  useDocumentTitle('Gallery — Photoblog')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const initial = searchParams.get('category') ?? ''
+  const [category, setCategory] = useState(initial)
   const categories = useApi<CategoriesResponse>('/api/categories')
+
+  useEffect(() => {
+    setCategory(searchParams.get('category') ?? '')
+  }, [searchParams])
 
   const photosPath = useMemo(() => {
     const params = new URLSearchParams({ limit: '48' })
@@ -18,6 +27,12 @@ export function GalleryPage() {
   }, [category])
 
   const photos = useApi<PhotosResponse>(photosPath)
+
+  function selectCategory(slug: string) {
+    setCategory(slug)
+    if (slug) setSearchParams({ category: slug })
+    else setSearchParams({})
+  }
 
   if (categories.loading && photos.loading) {
     return <StateBlock title="Loading gallery" detail="Fetching photographs…" />
@@ -47,13 +62,13 @@ export function GalleryPage() {
         </header>
 
         <div className="flex flex-wrap gap-2">
-          <FilterChip label="All" active={!category} onClick={() => setCategory('')} />
+          <FilterChip label="All" active={!category} onClick={() => selectCategory('')} />
           {cats.map((c) => (
             <FilterChip
               key={c.id}
               label={c.name}
               active={category === c.slug}
-              onClick={() => setCategory(c.slug)}
+              onClick={() => selectCategory(c.slug)}
             />
           ))}
         </div>

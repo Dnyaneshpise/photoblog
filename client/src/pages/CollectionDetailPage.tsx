@@ -1,21 +1,20 @@
 import { Link, useParams } from 'react-router-dom'
 import { StateBlock } from '../components/StateBlock'
 import { useApi } from '../hooks/useApi'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { CollectionDetailResponse } from '../types/api'
 
-/**
- * Single collection with ordered photographs.
- */
 export function CollectionDetailPage() {
   const { slug } = useParams<{ slug: string }>()
   const { data, error, loading } = useApi<CollectionDetailResponse>(
     slug ? `/api/collections/${slug}` : null,
   )
 
+  const collection = data?.data
+  useDocumentTitle(collection ? `${collection.title} — Photoblog` : 'Collection — Photoblog')
+
   if (loading) return <StateBlock title="Loading" detail="Opening the series…" />
   if (error) return <StateBlock title="Not found" detail={error} />
-
-  const collection = data?.data
   if (!collection) return <StateBlock title="Not found" detail="This collection is unavailable." />
 
   return (

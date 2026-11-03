@@ -1,12 +1,10 @@
 import { FormEvent, useState } from 'react'
 import { apiPost, ApiError } from '../lib/api'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { ContactSuccess } from '../types/api'
 
-/**
- * Public contact form.
- * Why: Visitors can reach the photographer; messages land in the database for admin later.
- */
 export function ContactPage() {
+  useDocumentTitle('Contact — Photoblog')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [subject, setSubject] = useState('')

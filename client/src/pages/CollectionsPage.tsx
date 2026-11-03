@@ -1,13 +1,11 @@
 import { Link } from 'react-router-dom'
 import { StateBlock } from '../components/StateBlock'
 import { useApi } from '../hooks/useApi'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { CollectionsResponse } from '../types/api'
 
-/**
- * Published collections index.
- * Why: Series are how the portfolio is structured beyond a flat grid.
- */
 export function CollectionsPage() {
+  useDocumentTitle('Collections — Photoblog')
   const { data, error, loading } = useApi<CollectionsResponse>('/api/collections')
 
   if (loading) return <StateBlock title="Loading" detail="Opening collections…" />

@@ -1,6 +1,5 @@
 /**
  * Shared TypeScript shapes matching the public API JSON.
- * Why: Pages stay type-safe without importing server code.
  */
 
 export type CategorySummary = {
@@ -23,6 +22,13 @@ export type Photo = {
   sortOrder: number
   category: CategorySummary | null
   createdAt?: string
+  collections?: Array<{
+    collection: {
+      id: string
+      title: string
+      slug: string
+    }
+  }>
 }
 
 export type PhotosResponse = {
