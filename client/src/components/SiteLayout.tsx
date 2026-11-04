@@ -3,13 +3,9 @@ import { Link, NavLink, Outlet } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { IconClose, IconMenu } from './icons/PhotologIcons'
 
-/**
- * Site-wide chrome: masthead, responsive navigation, footer.
- * Visual language: client/DESIGN.md
- */
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   [
-    'text-sm tracking-[0.14em] uppercase transition-colors',
+    'text-[0.7rem] font-medium tracking-[0.16em] uppercase transition-colors duration-200',
     isActive
       ? 'text-[var(--color-ink)]'
       : 'text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)]',
@@ -28,18 +24,17 @@ export function SiteLayout() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="px-6 md:px-12 py-7 md:py-9 border-b border-[var(--color-border)] sticky top-0 z-40 bg-[var(--color-canvas)]/95 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-6">
+      <header className="pl-masthead">
+        <div className="max-w-[72rem] mx-auto px-6 md:px-12 h-[4.25rem] md:h-[4.75rem] flex items-center justify-between gap-8">
           <Link
             to="/"
-            className="text-2xl md:text-[1.65rem] tracking-[0.04em] text-[var(--color-ink)]"
-            style={{ fontFamily: 'var(--font-display)' }}
+            className="pl-display text-[1.35rem] md:text-[1.5rem] tracking-[0.02em]"
             onClick={() => setMenuOpen(false)}
           >
             Photoblog
           </Link>
 
-          <nav className="hidden md:flex flex-wrap gap-x-8 gap-y-3" aria-label="Primary">
+          <nav className="hidden md:flex items-center gap-9" aria-label="Primary">
             {links.map((link) => (
               <NavLink
                 key={link.to}
@@ -54,13 +49,13 @@ export function SiteLayout() {
 
           <button
             type="button"
-            className="md:hidden flex items-center justify-center text-[var(--color-ink)] p-1"
+            className="md:hidden flex items-center justify-center text-[var(--color-ink)] p-1.5 -mr-1.5"
             aria-expanded={menuOpen}
             aria-controls="mobile-nav"
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             onClick={() => setMenuOpen((v) => !v)}
           >
-            {menuOpen ? <IconClose size={22} /> : <IconMenu size={22} />}
+            {menuOpen ? <IconClose size={20} /> : <IconMenu size={20} />}
           </button>
         </div>
 
@@ -68,24 +63,26 @@ export function SiteLayout() {
           {menuOpen && (
             <motion.nav
               id="mobile-nav"
-              className="md:hidden max-w-6xl mx-auto pt-6 flex flex-col gap-4"
+              className="md:hidden border-t border-[var(--color-rule)]"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
               aria-label="Mobile"
             >
-              {links.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  end={'end' in link ? link.end : false}
-                  className={navLinkClass}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {link.label}
-                </NavLink>
-              ))}
+              <div className="px-6 py-6 flex flex-col gap-5">
+                {links.map((link) => (
+                  <NavLink
+                    key={link.to}
+                    to={link.to}
+                    end={'end' in link ? link.end : false}
+                    className={navLinkClass}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {link.label}
+                  </NavLink>
+                ))}
+              </div>
             </motion.nav>
           )}
         </AnimatePresence>
@@ -95,15 +92,14 @@ export function SiteLayout() {
         <Outlet />
       </main>
 
-      <footer className="px-6 md:px-12 py-8 border-t border-[var(--color-border)]">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-[var(--color-ink-subtle)]">
-          <p
-            style={{ fontFamily: 'var(--font-display)' }}
-            className="text-base tracking-wide text-[var(--color-ink-muted)]"
-          >
+      <footer className="border-t border-[var(--color-rule)]">
+        <div className="max-w-[72rem] mx-auto px-6 md:px-12 py-10 md:py-12 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <p className="pl-display text-lg tracking-[0.02em] text-[var(--color-ink-secondary)]">
             Photoblog
           </p>
-          <p>© {new Date().getFullYear()} · Photographs & site by Dnyanesh Pise</p>
+          <p className="text-[0.7rem] tracking-[0.12em] uppercase text-[var(--color-ink-tertiary)]">
+            © {new Date().getFullYear()} Dnyanesh Pise
+          </p>
         </div>
       </footer>
     </div>

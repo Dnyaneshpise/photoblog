@@ -7,76 +7,65 @@ import { Lightbox } from './Lightbox'
 type PhotoCardProps = {
   photo: Photo
   emphasis?: boolean
-  /** When true, click opens lightbox instead of navigating to detail */
   preferLightbox?: boolean
+  index?: number
 }
 
-/**
- * Single photograph tile used on home and gallery.
- * Why: Keep image + caption markup consistent; optional lightbox for quick viewing.
- */
-export function PhotoCard({ photo, emphasis = false, preferLightbox = false }: PhotoCardProps) {
+export function PhotoCard({
+  photo,
+  emphasis = false,
+  preferLightbox = false,
+  index = 0,
+}: PhotoCardProps) {
   const [open, setOpen] = useState(false)
   const src = photo.thumbnailUrl || photo.imageUrl
   const full = photo.imageUrl
   const alt = photo.altText || photo.title
 
-  const image = (
-    <motion.img
-      src={src}
-      alt={alt}
-      loading="lazy"
-      className={
-        emphasis
-          ? 'w-full aspect-[3/2] object-cover'
-          : 'w-full aspect-[4/3] object-cover'
-      }
-      whileHover={{ scale: 1.03 }}
-      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-    />
+  const media = (
+    <div className={`pl-photo__frame ${emphasis ? 'aspect-[3/2]' : 'aspect-[4/5] sm:aspect-[4/3]'}`}>
+      <img src={src} alt={alt} loading="lazy" />
+    </div>
   )
 
   return (
     <motion.figure
-      className="group"
-      initial={{ opacity: 0, y: 16 }}
+      className="pl-photo group"
+      initial={{ opacity: 0, y: 18 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.5 }}
+      viewport={{ once: true, margin: '-48px' }}
+      transition={{ duration: 0.55, delay: Math.min(index * 0.06, 0.3), ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="overflow-hidden bg-[var(--color-border)]">
+      {preferLightbox ? (
+        <button
+          type="button"
+          className="block w-full text-left cursor-zoom-in"
+          onClick={() => setOpen(true)}
+          aria-label={`View ${photo.title}`}
+        >
+          {media}
+        </button>
+      ) : (
+        <Link to={`/gallery/${photo.id}`} className="block">
+          {media}
+        </Link>
+      )}
+
+      <figcaption className="pl-photo__meta">
         {preferLightbox ? (
           <button
             type="button"
-            className="block w-full text-left cursor-zoom-in"
+            className="pl-photo__title text-left"
             onClick={() => setOpen(true)}
-            aria-label={`View ${photo.title}`}
           >
-            {image}
+            {photo.title}
           </button>
         ) : (
-          <Link to={`/gallery/${photo.id}`} className="block">
-            {image}
+          <Link to={`/gallery/${photo.id}`} className="pl-photo__title block">
+            {photo.title}
           </Link>
         )}
-      </div>
-      <figcaption className="mt-3 space-y-1">
-        <p className="text-lg text-[var(--color-ink)]" style={{ fontFamily: 'var(--font-display)' }}>
-          {preferLightbox ? (
-            <button type="button" className="text-left hover:opacity-70" onClick={() => setOpen(true)}>
-              {photo.title}
-            </button>
-          ) : (
-            <Link to={`/gallery/${photo.id}`} className="hover:opacity-70">
-              {photo.title}
-            </Link>
-          )}
-        </p>
-        {photo.category && (
-          <p className="text-xs tracking-[0.16em] uppercase text-[var(--color-ink-subtle)]">
-            {photo.category.name}
-          </p>
-        )}
+        {photo.category && <p className="pl-photo__cat">{photo.category.name}</p>}
       </figcaption>
 
       <Lightbox
