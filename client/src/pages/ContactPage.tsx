@@ -44,89 +44,71 @@ export function ContactPage() {
     }
   }
 
-  const fieldClass =
-    'w-full px-4 py-3 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-ink)] placeholder:text-[var(--color-ink-subtle)] focus:border-[var(--color-ink)] outline-none transition-colors'
-
   return (
-    <div className="px-6 md:px-12 py-14 md:py-20">
-      <div className="max-w-xl mx-auto space-y-10">
-        <header className="space-y-4">
-          <p className="text-xs tracking-[0.22em] uppercase text-[var(--color-ink-subtle)]">Contact</p>
-          <h1
-            className="text-4xl md:text-5xl text-[var(--color-ink)]"
-            style={{ fontFamily: 'var(--font-display)' }}
-          >
-            Write a note
-          </h1>
-          <p className="text-[var(--color-ink-muted)] leading-relaxed">
-            For commissions, prints, or a quiet hello — messages are stored securely and read personally.
+    <div className="pl-page">
+      <div className="max-w-lg mx-auto space-y-12">
+        <header className="space-y-5">
+          <p className="pl-kicker">Contact</p>
+          <h1 className="pl-display text-[clamp(2.2rem,5vw,3.5rem)]">Write a note</h1>
+          <p className="pl-lead">
+            For commissions, prints, or a quiet hello — messages are read personally.
           </p>
         </header>
 
-        <form onSubmit={onSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-xs tracking-[0.14em] uppercase text-[var(--color-ink-subtle)]">
-              Name
-            </label>
+        <form onSubmit={onSubmit} className="space-y-8">
+          <div>
+            <label htmlFor="name" className="pl-label">Name</label>
             <input
               id="name"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className={fieldClass}
+              className="pl-field"
               autoComplete="name"
             />
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-xs tracking-[0.14em] uppercase text-[var(--color-ink-subtle)]">
-              Email
-            </label>
+          <div>
+            <label htmlFor="email" className="pl-label">Email</label>
             <input
               id="email"
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={fieldClass}
+              className="pl-field"
               autoComplete="email"
             />
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="subject" className="text-xs tracking-[0.14em] uppercase text-[var(--color-ink-subtle)]">
-              Subject <span className="normal-case tracking-normal">(optional)</span>
+          <div>
+            <label htmlFor="subject" className="pl-label">
+              Subject <span className="normal-case tracking-normal opacity-60">(optional)</span>
             </label>
             <input
               id="subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className={fieldClass}
+              className="pl-field"
             />
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="message" className="text-xs tracking-[0.14em] uppercase text-[var(--color-ink-subtle)]">
-              Message
-            </label>
+          <div>
+            <label htmlFor="message" className="pl-label">Message</label>
             <textarea
               id="message"
               required
-              rows={6}
+              rows={5}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className={`${fieldClass} resize-y min-h-[9rem]`}
+              className="pl-field resize-y min-h-[8rem]"
             />
           </div>
 
-          {error && <p className="text-sm text-red-700">{error}</p>}
-          {success && <p className="text-sm text-[var(--color-ink-muted)]">{success}</p>}
+          {error && <p className="text-sm text-red-800">{error}</p>}
+          {success && <p className="text-sm text-[var(--color-ink-secondary)]">{success}</p>}
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="inline-flex items-center px-7 py-3 text-xs tracking-[0.18em] uppercase bg-[var(--color-ink)] text-[var(--color-canvas)] disabled:opacity-60"
-          >
+          <button type="submit" disabled={submitting} className="pl-btn">
             {submitting ? 'Sending…' : 'Send message'}
           </button>
         </form>
