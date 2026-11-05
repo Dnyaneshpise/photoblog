@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { IconClose } from './icons/PhotologIcons'
+import { IconArrowLeft, IconArrowRight, IconClose } from './icons/PhotologIcons'
 
 type LightboxProps = {
   open: boolean
@@ -9,23 +9,51 @@ type LightboxProps = {
   alt: string
   title?: string
   onClose: () => void
+  /** Optional gallery navigation */
+  onPrev?: () => void
+  onNext?: () => void
+  index?: number
+  total?: number
 }
 
-export function Lightbox({ open, src, alt, title, onClose }: LightboxProps) {
+/**
+ * Full-viewport viewer with Escape, optional arrow keys, and position counter.
+ */
+export function Lightbox({
+  open,
+  src,
+  alt,
+  title,
+  onClose,
+  onPrev,
+  onNext,
+  index,
+  total,
+}: LightboxProps) {
   useEffect(() => {
     if (!open) return
+
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
+      if (event.key === 'ArrowLeft') onPrev?.()
+      if (event.key === 'ArrowRight') onNext?.()
     }
+
     document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', onKey)
     return () => {
       document.body.style.overflow = ''
       window.removeEventListener('keydown', onKey)
     }
-  }, [open, onClose])
+  }, [open, onClose, onPrev, onNext])
 
   if (typeof document === 'undefined') return null
+
+  const showNav = Boolean(onPrev || onNext)
+  const counter =
+    typeof index === 'number' && typeof total === 'number' && total > 0
+      ? `${index + 1} / ${total}`
+      : null
 
   return createPortal(
     <AnimatePresence>
@@ -49,27 +77,61 @@ export function Lightbox({ open, src, alt, title, onClose }: LightboxProps) {
           >
             <IconClose size={22} />
           </button>
+
+          {showNav && (
+            <>
+              <button
+                type="button"
+                className="absolute left-3 md:left-8 top-1/2 -translate-y-1/2 text-[#f2f0eb]/70 hover:text-[#f2f0eb] p-2 disabled:opacity-30"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onPrev?.()
+                }}
+                aria-label="Previous photograph"
+                disabled={!onPrev}
+              >
+                <IconArrowLeft size={28} />
+              </button>
+              <button
+                type="button"
+                className="absolute right-3 md:right-8 top-1/2 -translate-y-1/2 text-[#f2f0eb]/70 hover:text-[#f2f0eb] p-2 disabled:opacity-30"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onNext?.()
+                }}
+                aria-label="Next photograph"
+                disabled={!onNext}
+              >
+                <IconArrowRight size={28} />
+              </button>
+            </>
+          )}
+
           <motion.figure
             className="relative max-w-6xl w-full"
+            key={src}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             onClick={(e) => e.stopPropagation()}
           >
-            <img
-              src={src}
-              alt={alt}
-              className="w-full max-h-[80vh] object-contain mx-auto"
-            />
-            {title && (
-              <figcaption
-                className="mt-5 text-center text-[#f2f0eb]/80 text-lg tracking-[-0.02em]"
-                style={{ fontFamily: 'var(--font-display)' }}
-              >
-                {title}
-              </figcaption>
-            )}
+            <img src={src} alt={alt} className="w-full max-h-[80vh] object-contain mx-auto" />
+            <figcaption className="mt-5 text-center space-y-1">
+              {title && (
+                <p
+                  className="text-[#f2f0eb]/85 text-lg tracking-[-0.02em]"
+                  style={{ fontFamily: 'var(--font-display)' }}
+                >
+                  {title}
+                </p>
+              )}
+              {counter && (
+                <p className="text-[0.65rem] tracking-[0.18em] uppercase text-[#f2f0eb]/45">
+                  {counter}
+                </p>
+              )}
+            </figcaption>
           </motion.figure>
         </motion.div>
       )}

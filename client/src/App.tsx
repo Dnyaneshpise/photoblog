@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { SiteLayout } from './components/SiteLayout'
+import { ScrollToTop } from './components/ScrollToTop'
 import { HomePage } from './pages/HomePage'
 import { GalleryPage } from './pages/GalleryPage'
 import { PhotoDetailPage } from './pages/PhotoDetailPage'
@@ -7,6 +8,7 @@ import { CollectionsPage } from './pages/CollectionsPage'
 import { CollectionDetailPage } from './pages/CollectionDetailPage'
 import { AboutPage } from './pages/AboutPage'
 import { ContactPage } from './pages/ContactPage'
+import { NotFoundPage } from './pages/NotFoundPage'
 import { AdminAuthProvider } from './context/AdminAuthContext'
 import { AdminLoginPage } from './pages/admin/AdminLoginPage'
 import { AdminLayout } from './pages/admin/AdminLayout'
@@ -16,9 +18,13 @@ import { AdminCategoriesPage } from './pages/admin/AdminCategoriesPage'
 import { AdminSettingsPage } from './pages/admin/AdminSettingsPage'
 import { AdminMessagesPage } from './pages/admin/AdminMessagesPage'
 
+/**
+ * Public routes under SiteLayout; admin routes unchanged.
+ */
 export default function App() {
   return (
     <AdminAuthProvider>
+      <ScrollToTop />
       <Routes>
         <Route element={<SiteLayout />}>
           <Route index element={<HomePage />} />
@@ -28,6 +34,7 @@ export default function App() {
           <Route path="collections/:slug" element={<CollectionDetailPage />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
 
         <Route path="admin/login" element={<AdminLoginPage />} />
