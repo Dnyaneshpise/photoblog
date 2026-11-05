@@ -6,12 +6,13 @@ import App from './App'
 
 /**
  * Application entry point.
- * StrictMode helps catch common React mistakes during development.
- * BrowserRouter enables client-side routing without full page reloads.
+ * basename follows Vite's base (e.g. "/photoblog" on GitHub Pages).
  */
+const basename = import.meta.env.BASE_URL.replace(/\/$/, '')
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={basename || undefined}>
       <App />
     </BrowserRouter>
   </StrictMode>,

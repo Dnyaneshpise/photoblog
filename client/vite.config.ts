@@ -5,13 +5,11 @@ import path from 'node:path'
 
 /**
  * Vite configuration for the Photoblog client.
- * - React plugin: enables JSX/TSX and Fast Refresh.
- * - Tailwind v4 plugin: processes utility classes at build time.
- * - Path alias `@` → `src` so imports stay short and readable.
- * - Dev proxy: forwards /api requests to the Express server so the
- *   frontend can call the backend without CORS friction in development.
+ * VITE_BASE_PATH: set to "/photoblog/" on GitHub Pages (project site).
+ * Locally and on hosts at domain root, leave unset so base stays "/".
  */
 export default defineConfig({
+  base: process.env.VITE_BASE_PATH || '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -21,8 +19,6 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // Any request starting with /api is forwarded to the backend.
-      // This keeps the browser origin the same and avoids CORS in local dev.
       '/api': {
         target: 'http://localhost:4000',
         changeOrigin: true,
