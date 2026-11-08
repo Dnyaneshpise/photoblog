@@ -1,41 +1,29 @@
 import { Link } from 'react-router-dom'
-import { useSeoMeta } from '../hooks/useSeoMeta'
+import { motion } from 'framer-motion'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { IconArrowRight } from '../components/icons/PhotologIcons'
 
-/**
- * Branded 404 for unknown public routes.
- */
 export function NotFoundPage() {
-  useSeoMeta({
-    title: 'Not found — Photoblog',
-    description: 'This page does not exist on Photoblog.',
-  })
+  useDocumentTitle('Not found — Photoblog')
 
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center px-6 text-center space-y-6">
-      <p className="text-xs tracking-[0.22em] uppercase text-[var(--color-ink-subtle)]">404</p>
-      <h1
-        className="text-4xl md:text-5xl text-[var(--color-ink)]"
-        style={{ fontFamily: 'var(--font-display)' }}
+    <div className="pl-page">
+      <motion.div
+        className="max-w-xl mx-auto space-y-8 py-16 md:py-24"
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
       >
-        This frame is missing
-      </h1>
-      <p className="text-[var(--color-ink-muted)] max-w-md leading-relaxed">
-        The page you requested is not part of the portfolio. Return home or browse the gallery.
-      </p>
-      <div className="flex flex-wrap justify-center gap-4 pt-2">
-        <Link
-          to="/"
-          className="inline-flex px-7 py-3 text-xs tracking-[0.18em] uppercase bg-[var(--color-ink)] text-[var(--color-canvas)]"
-        >
-          Home
+        <p className="pl-kicker">404</p>
+        <h1 className="pl-display text-[clamp(2.2rem,5vw,3.25rem)]">This page is not in the archive.</h1>
+        <p className="pl-lead">
+          The frame you asked for may have moved, or the link is incomplete.
+        </p>
+        <Link to="/" className="pl-btn inline-flex">
+          Return home
+          <IconArrowRight size={14} />
         </Link>
-        <Link
-          to="/gallery"
-          className="inline-flex px-7 py-3 text-xs tracking-[0.18em] uppercase border border-[var(--color-border)]"
-        >
-          Gallery
-        </Link>
-      </div>
+      </motion.div>
     </div>
   )
 }

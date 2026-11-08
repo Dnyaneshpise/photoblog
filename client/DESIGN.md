@@ -1,84 +1,70 @@
 # Photolog Design System
 
-**Authority:** Single source of truth for visual and interaction design.  
-**Product:** Photolog / Photoblog · **Owner:** Dnyanesh Pise  
-**License:** Original design assets (icons, loaders, motion, type system, color, component language) are proprietary to this project.
-
-**Principle:** Photographs are the content. Everything else is secondary architecture.
-
----
+**Authority for all client UI.** Original work for Photolog.  
+**License / ownership:** © Photolog — Dnyanesh Pise. All design tokens, motion, icons, and component language in this system are project-original and licensed under the project owner. Do not treat as generic template or third-party kit.
 
 ## Stance
 
-1. Editorial quiet — museum-grade restraint, not template minimalism.
-2. Hierarchy through scale and space, not decoration.
-3. One foundry voice: Instrument Serif + Instrument Sans.
-4. Motion is functional (orientation, feedback). Never ornamental.
-5. No Inter/Cormorant defaults, no Lucide packs, no glass cards, no generic spinners.
+- The photograph is the product. Chrome is quiet.
+- Editorial, not SaaS. Paper and ink, not glass and purple gradients.
+- Motion is short, purposeful, and ease-out — never delayed for spectacle.
+- Prefer optical judgment over rigid 8px grids when they fight the image.
 
----
+## Typography
 
-## Type
-
-| Role | Face | Notes |
-|------|------|-------|
-| Display | Instrument Serif | Titles, wordmark — tracking −0.025em to −0.03em |
-| Body / UI | Instrument Sans | Nav, captions, forms |
-
-Display sizes use `clamp()` for fluid premium scale. Kickers: 0.65rem, 0.18–0.22em tracking, uppercase.
-
----
+- **Display:** Instrument Serif — titles, wordmark, photo titles  
+- **Body / UI:** Instrument Sans — navigation, meta, forms  
+- Display tracking tight (−0.03em). Kickers uppercase, wide tracking (~0.2em).
 
 ## Color
 
-| Token | Value |
-|-------|-------|
-| paper / canvas | `#f2f0eb` |
-| surface | `#faf9f6` |
-| ink | `#121110` |
-| ink-secondary / muted | `#3a3835` |
-| ink-tertiary / subtle | `#6f6c66` |
-| rule / border | `#d2cfc7` |
+| Token | Value | Use |
+|-------|-------|-----|
+| paper / canvas | `#efece6` | Page ground |
+| surface | `#f7f5f0` | Raised soft areas |
+| ink | `#0e0d0c` | Primary type |
+| ink-secondary | `#3a3733` | Body secondary |
+| ink-tertiary | `#6a6660` | Meta, kickers |
+| rule | `#cfc9bf` | Hairlines |
+| night | `#0c0b0a` | Cover / lightbox |
 
----
+Paper grain overlay (fixed, low opacity) is intentional — tactile print feel.
 
-## Component language
+## Layout patterns
 
-| Class / component | Role |
-|-------------------|------|
-| `.pl-btn` / `.pl-btn-ghost` | Primary / secondary actions |
-| `.pl-field` / `.pl-label` | Underline form fields |
-| `.pl-filter` | Gallery category filters |
-| `.pl-photo` + meta rule | Photo tiles |
-| `.pl-kicker` / `.pl-display` / `.pl-lead` | Editorial type roles |
-| `.pl-page` | Consistent page padding |
-| `ApertureLoader` | Loading (shutter blades) |
-| `PhotologIcons` | Menu, Close, Arrows, External, Grid, Frame |
+1. **Cover** — full-bleed featured image, bottom-aligned type, transparent masthead that solidifies on scroll.  
+2. **Filmstrip** — horizontal snap scroll for recent selections.  
+3. **Bento** — asymmetric featured block on home.  
+4. **Mosaic** — gallery grid with mixed aspect rhythm (not equal tiles).  
+5. **Underline filters** — category links, not solid chips.
 
----
+## Motion (Photolog originals)
 
-## Layout
+- **Aperture loader** — eight blades, staggered opacity.  
+- **Curtain reveal** — top-origin scaleY on image load.  
+- **Viewfinder** — four corner ticks on photo hover.  
+- **Cover ken-burns** — soft scale-in on hero.  
+- **Lightbox** — fade + slight scale; counter `01 — 12` form.  
+- Easings: `--ease-out-expo` `[0.16, 1, 0.3, 1]`, `--ease-pl` `[0.22, 1, 0.36, 1]`.  
+- Respect `prefers-reduced-motion`.
 
-- Max content width ~72rem for galleries; ~3xl for text pages.
-- Home: left-aligned editorial hero (not centered brochure).
-- Section indices (`01 — Selected`) for quiet structure.
-- Photo meta sits under a thin rule — captions never float on the image.
-- Sticky masthead with frosted paper, not solid white bar.
+## Components
 
----
+- `pl-*` CSS classes are the public design API.  
+- Icons: `PhotologIcons.tsx` only — no Lucide/Heroicons in public UI.  
+- Buttons: solid ink / ghost on cover / ink-ghost on paper.  
+- Forms: underline fields, uppercase micro labels.
 
-## Motion
+## Commit discipline
 
-- Easing: `cubic-bezier(0.22, 1, 0.36, 1)`
-- Image hover: scale 1.025 over 0.85s — restrained
-- Grid enter: staggered fade-up, max delay 0.3s
-- Honor `prefers-reduced-motion`
+- Max **one commit per day** on this project.  
+- Batch all design work into that single commit.  
+- Conventional commits (`feat` / `fix` / `docs` / `chore`). No “Day N” messages.
 
----
+## Do not
 
-## Change protocol
-
-1. Read this file before UI work.
-2. Prefer tokens and `.pl-*` classes over one-offs.
-3. New patterns → document here in the same change.
-4. **One commit per day maximum** for this project when shipping design.
+- Introduce Inter, Roboto, system-default “AI” stacks as primary UI.  
+- Add purple/blue SaaS accents.  
+- Equal 3-column grids as the only gallery layout.  
+- Loud parallax or scrolljacking.  
+- Commit multiple times in one calendar day.
