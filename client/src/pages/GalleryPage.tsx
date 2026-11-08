@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { PhotoCard } from '../components/PhotoCard'
 import { Lightbox } from '../components/Lightbox'
 import { StateBlock } from '../components/StateBlock'
@@ -8,7 +9,7 @@ import { useSeoMeta } from '../hooks/useSeoMeta'
 import type { CategoriesResponse, Photo, PhotosResponse } from '../types/api'
 
 /**
- * Public gallery with filters and a navigable lightbox for the current result set.
+ * Public gallery — editorial filters, mosaic rhythm, navigable lightbox.
  */
 export function GalleryPage() {
   useSeoMeta({
@@ -60,7 +61,7 @@ export function GalleryPage() {
   }
 
   if (categories.loading && photos.loading) {
-    return <StateBlock title="Loading gallery" detail="Fetching photographs…" />
+    return <StateBlock title="Loading gallery" detail="Fetching photographs…" loading />
   }
 
   if (photos.error) {
@@ -68,39 +69,42 @@ export function GalleryPage() {
   }
 
   return (
-    <div className="px-6 md:px-12 py-14 md:py-20">
-      <div className="max-w-[72rem] mx-auto space-y-12">
-        <header className="max-w-2xl space-y-4">
-          <p className="text-xs tracking-[0.22em] uppercase text-[var(--color-ink-subtle)]">Gallery</p>
-          <h1
-            className="text-4xl md:text-5xl text-[var(--color-ink)]"
-            style={{ fontFamily: 'var(--font-display)' }}
-          >
-            All photographs
-          </h1>
-          <p className="text-[var(--color-ink-muted)] leading-relaxed">
-            Click a frame to open the lightbox. Use arrow keys to move through the set.
+    <div className="pl-page">
+      <div className="max-w-[72rem] mx-auto space-y-12 md:space-y-14">
+        <motion.header
+          className="max-w-2xl space-y-4"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <p className="pl-kicker">Archive</p>
+          <h1 className="pl-display text-[clamp(2.25rem,5vw,3.5rem)]">All photographs</h1>
+          <p className="pl-lead max-w-lg">
+            A living set of published work. Open any frame; use the arrow keys to move through the set.
           </p>
-        </header>
+        </motion.header>
 
-        <div className="flex flex-wrap gap-2">
-          <FilterChip label="All" active={!category} onClick={() => selectCategory('')} />
+        <nav
+          className="flex flex-wrap items-center gap-x-7 gap-y-3 border-b border-[var(--color-rule)] pb-1"
+          aria-label="Filter by category"
+        >
+          <FilterLink label="All" active={!category} onClick={() => selectCategory('')} />
           {cats.map((c) => (
-            <FilterChip
+            <FilterLink
               key={c.id}
               label={c.name}
               active={category === c.slug}
               onClick={() => selectCategory(c.slug)}
             />
           ))}
-        </div>
+        </nav>
 
         {photos.loading ? (
-          <StateBlock title="Loading" detail="Updating the grid…" />
+          <StateBlock title="Loading" detail="Updating the grid…" loading />
         ) : list.length === 0 ? (
           <StateBlock title="No photographs" detail="Nothing published in this filter yet." />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-12 md:gap-y-14">
+          <div className="pl-mosaic">
             {list.map((photo, i) => (
               <PhotoCard
                 key={photo.id}
@@ -108,6 +112,7 @@ export function GalleryPage() {
                 preferLightbox
                 index={i}
                 onOpenLightbox={openLightbox}
+                aspect={mosaicAspect(i)}
               />
             ))}
           </div>
@@ -129,7 +134,21 @@ export function GalleryPage() {
   )
 }
 
-function FilterChip({
+function mosaicAspect(i: number): string {
+  const pattern = [
+    'aspect-[4/5]',
+    'aspect-[3/4]',
+    'aspect-[4/3]',
+    'aspect-[1/1]',
+    'aspect-[3/4]',
+    'aspect-[4/5]',
+    'aspect-[16/10]',
+    'aspect-[3/2]',
+  ]
+  return pattern[i % pattern.length]
+}
+
+function FilterLink({
   label,
   active,
   onClick,
@@ -142,12 +161,7 @@ function FilterChip({
     <button
       type="button"
       onClick={onClick}
-      className={[
-        'px-4 py-2 text-xs tracking-[0.14em] uppercase border transition-colors',
-        active
-          ? 'bg-[var(--color-ink)] text-[var(--color-canvas)] border-[var(--color-ink)]'
-          : 'bg-transparent text-[var(--color-ink-muted)] border-[var(--color-border)] hover:border-[var(--color-ink)]',
-      ].join(' ')}
+      className={['pl-filter', active ? 'is-active' : ''].join(' ')}
     >
       {label}
     </button>
