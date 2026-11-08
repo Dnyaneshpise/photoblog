@@ -169,7 +169,7 @@ button { font-family: inherit; cursor: pointer; }
   letter-spacing: 0.18em; text-transform: uppercase;
   border: 1px solid color-mix(in srgb, var(--color-paper) 35%, transparent);
   background: transparent; color: var(--color-paper);
-  transition: border-color 0.25s var(--ease-pl, background 0.25s var(--ease-pl);
+  transition: border-color 0.25s var(--ease-pl), background 0.25s var(--ease-pl);
 }
 .pl-btn-ghost:hover {
   border-color: var(--color-paper);
