@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react'
+import { motion } from 'framer-motion'
 import { apiPost, ApiError } from '../lib/api'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { ContactSuccess } from '../types/api'
@@ -46,16 +47,27 @@ export function ContactPage() {
 
   return (
     <div className="pl-page">
-      <div className="max-w-lg mx-auto space-y-12">
-        <header className="space-y-5">
+      <div className="max-w-lg mx-auto space-y-12 md:space-y-14">
+        <motion.header
+          className="space-y-5"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+        >
           <p className="pl-kicker">Contact</p>
           <h1 className="pl-display text-[clamp(2.2rem,5vw,3.5rem)]">Write a note</h1>
           <p className="pl-lead">
             For commissions, prints, or a quiet hello — messages are read personally.
           </p>
-        </header>
+        </motion.header>
 
-        <form onSubmit={onSubmit} className="space-y-8">
+        <motion.form
+          onSubmit={onSubmit}
+          className="space-y-8"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+        >
           <div>
             <label htmlFor="name" className="pl-label">Name</label>
             <input
@@ -82,9 +94,7 @@ export function ContactPage() {
           </div>
 
           <div>
-            <label htmlFor="subject" className="pl-label">
-              Subject <span className="normal-case tracking-normal opacity-60">(optional)</span>
-            </label>
+            <label htmlFor="subject" className="pl-label">Subject</label>
             <input
               id="subject"
               value={subject}
@@ -98,20 +108,24 @@ export function ContactPage() {
             <textarea
               id="message"
               required
-              rows={5}
+              rows={6}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className="pl-field resize-y min-h-[8rem]"
             />
           </div>
 
-          {error && <p className="text-sm text-red-800">{error}</p>}
-          {success && <p className="text-sm text-[var(--color-ink-secondary)]">{success}</p>}
+          {error && (
+            <p className="text-sm text-red-800/80" role="alert">{error}</p>
+          )}
+          {success && (
+            <p className="text-sm text-[var(--color-ink-secondary)]" role="status">{success}</p>
+          )}
 
-          <button type="submit" disabled={submitting} className="pl-btn">
+          <button type="submit" className="pl-btn" disabled={submitting}>
             {submitting ? 'Sending…' : 'Send message'}
           </button>
-        </form>
+        </motion.form>
       </div>
     </div>
   )
