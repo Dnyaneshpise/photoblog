@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import type { Photo } from '../types/api'
@@ -13,7 +14,8 @@ type PhotoCardProps = {
 }
 
 /**
- * Photograph tile — navigates to detail or opens a parent-controlled lightbox.
+ * Photograph tile — Photolog original.
+ * Curtain reveal on load, viewfinder on hover, optional parent lightbox.
  */
 export function PhotoCard({
   photo,
@@ -23,19 +25,26 @@ export function PhotoCard({
   aspect,
   onOpenLightbox,
 }: PhotoCardProps) {
+  const [loaded, setLoaded] = useState(false)
   const src = photo.thumbnailUrl || photo.imageUrl
   const alt = photo.altText || photo.title
   const frameAspect = aspect || (emphasis ? 'aspect-[3/2]' : 'aspect-[4/5] sm:aspect-[4/3]')
 
-  const media = (
-    <div className={`pl-photo__frame ${frameAspect}`}>
-      <img src={src} alt={alt} loading="lazy" />
-    </div>
-  )
-
   function open() {
     if (preferLightbox && onOpenLightbox) onOpenLightbox(photo)
   }
+
+  const media = (
+    <div className={`pl-photo__frame ${frameAspect} ${loaded ? 'is-loaded' : ''}`}>
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+      />
+      <span className="pl-photo__veil" aria-hidden />
+    </div>
+  )
 
   return (
     <motion.figure
@@ -45,7 +54,7 @@ export function PhotoCard({
       viewport={{ once: true, margin: '-40px' }}
       transition={{
         duration: 0.65,
-        delay: Math.min(index * 0.07, 0.35),
+        delay: Math.min(index * 0.06, 0.32),
         ease: [0.16, 1, 0.3, 1],
       }}
     >
