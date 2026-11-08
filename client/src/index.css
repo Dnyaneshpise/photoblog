@@ -1,5 +1,6 @@
 /**
- * Photolog — creative system
+ * Photolog design system — original work
+ * © Photolog / Dnyanesh Pise. All rights reserved.
  * Authority: client/DESIGN.md
  */
 
@@ -28,6 +29,7 @@
 
   --ease-pl: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -63,7 +65,7 @@ body::before {
   inset: 0;
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.035;
+  opacity: 0.032;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 180px 180px;
@@ -105,8 +107,16 @@ button { font-family: inherit; cursor: pointer; }
   50% { opacity: 1; transform: scaleY(1.4); }
 }
 @keyframes pl-cover-in {
-  from { transform: scale(1.08); opacity: 0.7; }
+  from { transform: scale(1.08); opacity: 0.65; }
   to { transform: scale(1.03); opacity: 1; }
+}
+@keyframes pl-curtain {
+  from { transform: scaleY(1); }
+  to { transform: scaleY(0); }
+}
+@keyframes pl-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }
 
 .pl-fade-up { animation: pl-fade-up 0.7s var(--ease-out-expo) both; }
@@ -134,6 +144,12 @@ button { font-family: inherit; cursor: pointer; }
 .pl-aperture__blade:nth-child(8) { transform: rotate(270deg); animation-delay: 0.42s; }
 .pl-aperture__blade:nth-child(9) { transform: rotate(315deg); animation-delay: 0.49s; }
 
+.pl-skeleton {
+  background: linear-gradient(90deg, var(--color-rule) 0%, var(--color-surface) 50%, var(--color-rule) 100%);
+  background-size: 200% 100%;
+  animation: pl-shimmer 1.4s ease-in-out infinite;
+}
+
 .pl-btn {
   display: inline-flex; align-items: center; gap: 0.55rem;
   padding: 0.9rem 1.55rem;
@@ -153,7 +169,7 @@ button { font-family: inherit; cursor: pointer; }
   letter-spacing: 0.18em; text-transform: uppercase;
   border: 1px solid color-mix(in srgb, var(--color-paper) 35%, transparent);
   background: transparent; color: var(--color-paper);
-  transition: border-color 0.25s var(--ease-pl), background 0.25s var(--ease-pl);
+  transition: border-color 0.25s var(--ease-pl, background 0.25s var(--ease-pl);
 }
 .pl-btn-ghost:hover {
   border-color: var(--color-paper);
@@ -189,48 +205,81 @@ button { font-family: inherit; cursor: pointer; }
 .pl-filter {
   font-size: 0.7rem; font-weight: 500;
   letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--color-ink-tertiary); padding: 0.4rem 0;
+  color: var(--color-ink-tertiary); padding: 0.45rem 0;
   border-bottom: 1px solid transparent;
   transition: color 0.2s var(--ease-pl), border-color 0.2s var(--ease-pl);
 }
 .pl-filter:hover { color: var(--color-ink); }
-.pl-filter.is-active { color: var(--color-ink); border-bottom-color: var(--color-ink); }
+.pl-filter.is-active {
+  color: var(--color-ink);
+  border-bottom-color: var(--color-ink);
+}
 
 .pl-photo { display: block; position: relative; }
 .pl-photo__frame {
-  overflow: hidden; background: var(--color-rule);
+  overflow: hidden;
+  background: var(--color-rule);
   position: relative;
 }
 .pl-photo__frame img {
   width: 100%; height: 100%; object-fit: cover;
-  transition: transform 1s var(--ease-out-expo), filter 0.5s var(--ease-pl);
+  opacity: 0;
+  transition:
+    transform 1.05s var(--ease-out-expo),
+    filter 0.5s var(--ease-pl),
+    opacity 0.45s var(--ease-pl);
 }
+.pl-photo__frame.is-loaded img { opacity: 1; }
 .pl-photo:hover .pl-photo__frame img {
-  transform: scale(1.04);
-  filter: brightness(0.92);
+  transform: scale(1.045);
+  filter: brightness(0.9);
 }
-.pl-photo__frame::before,
+
 .pl-photo__frame::after {
   content: "";
   position: absolute;
-  width: 18px; height: 18px;
+  inset: 0;
+  background: var(--color-canvas);
+  transform-origin: top;
+  z-index: 1;
+  pointer-events: none;
+  transition: none;
+}
+.pl-photo__frame.is-loaded::after {
+  animation: pl-curtain 0.85s var(--ease-out-expo) forwards;
+}
+
+.pl-photo__frame::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1px solid transparent;
   opacity: 0;
-  transition: opacity 0.35s var(--ease-pl);
   z-index: 2;
   pointer-events: none;
+  transition: opacity 0.35s var(--ease-pl);
+  background:
+    linear-gradient(#f7f5f0, #f7f5f0) top left / 16px 1.5px no-repeat,
+    linear-gradient(#f7f5f0, #f7f5f0) top left / 1.5px 16px no-repeat,
+    linear-gradient(#f7f5f0, #f7f5f0) top right / 16px 1.5px no-repeat,
+    linear-gradient(#f7f5f0, #f7f5f0) top right / 1.5px 16px no-repeat,
+    linear-gradient(#f7f5f0, #f7f5f0) bottom left / 16px 1.5px no-repeat,
+    linear-gradient(#f7f5f0, #f7f5f0) bottom left / 1.5px 16px no-repeat,
+    linear-gradient(#f7f5f0, #f7f5f0) bottom right / 16px 1.5px no-repeat,
+    linear-gradient(#f7f5f0, #f7f5f0) bottom right / 1.5px 16px no-repeat;
 }
-.pl-photo__frame::before {
-  top: 12px; left: 12px;
-  border-top: 1.5px solid #f7f5f0;
-  border-left: 1.5px solid #f7f5f0;
+.pl-photo:hover .pl-photo__frame::before { opacity: 0.92; }
+
+.pl-photo__veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(12, 11, 10, 0.55) 0%, transparent 48%);
+  opacity: 0;
+  z-index: 1;
+  transition: opacity 0.4s var(--ease-pl);
+  pointer-events: none;
 }
-.pl-photo__frame::after {
-  bottom: 12px; right: 12px;
-  border-bottom: 1.5px solid #f7f5f0;
-  border-right: 1.5px solid #f7f5f0;
-}
-.pl-photo:hover .pl-photo__frame::before,
-.pl-photo:hover .pl-photo__frame::after { opacity: 0.9; }
+.pl-photo:hover .pl-photo__veil { opacity: 1; }
 
 .pl-photo__meta {
   margin-top: 0.95rem;
@@ -244,7 +293,9 @@ button { font-family: inherit; cursor: pointer; }
   font-size: 1.2rem;
   letter-spacing: -0.02em;
   color: var(--color-ink);
+  transition: opacity 0.2s var(--ease-pl);
 }
+.pl-photo:hover .pl-photo__title { opacity: 0.72; }
 .pl-photo__cat {
   font-size: 0.62rem;
   letter-spacing: 0.16em;
@@ -377,6 +428,33 @@ button { font-family: inherit; cursor: pointer; }
   .pl-bento > :nth-child(1) { grid-row: 1 / span 2; }
 }
 
+.pl-mosaic {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.75rem 1.25rem;
+}
+@media (min-width: 640px) {
+  .pl-mosaic {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem 1.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .pl-mosaic {
+    grid-template-columns: repeat(12, 1fr);
+    gap: 2.25rem 1.5rem;
+  }
+  .pl-mosaic > * { grid-column: span 4; }
+  .pl-mosaic > :nth-child(8n + 1) { grid-column: span 5; }
+  .pl-mosaic > :nth-child(8n + 2) { grid-column: span 3; }
+  .pl-mosaic > :nth-child(8n + 3) { grid-column: span 4; }
+  .pl-mosaic > :nth-child(8n + 4) { grid-column: span 4; }
+  .pl-mosaic > :nth-child(8n + 5) { grid-column: span 5; }
+  .pl-mosaic > :nth-child(8n + 6) { grid-column: span 3; }
+  .pl-mosaic > :nth-child(8n + 7) { grid-column: span 6; }
+  .pl-mosaic > :nth-child(8n + 8) { grid-column: span 6; }
+}
+
 .pl-page { padding: 3.5rem 1.5rem 4.5rem; }
 @media (min-width: 768px) {
   .pl-page { padding: 5rem 3rem 6rem; }
@@ -428,4 +506,11 @@ button { font-family: inherit; cursor: pointer; }
 .pl-masthead.is-over-cover .pl-nav-link:hover,
 .pl-masthead.is-over-cover .pl-nav-link.is-active {
   color: #f7f5f0;
+}
+
+.pl-lb-counter {
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, #f7f5f0 45%, transparent);
 }
