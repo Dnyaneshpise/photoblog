@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { Link, useParams } from 'react-router-dom'
 import { StateBlock } from '../components/StateBlock'
 import { Lightbox } from '../components/Lightbox'
@@ -59,59 +60,53 @@ export function PhotoDetailPage() {
                 className="w-full max-h-[78vh] object-contain mx-auto"
               />
             </button>
-            <figcaption className="max-w-2xl space-y-4">
-              <h1
-                className="text-3xl md:text-4xl text-[var(--color-ink)]"
-                style={{ fontFamily: 'var(--font-display)' }}
-              >
-                {photo.title}
-              </h1>
-              {photo.description && (
-                <p className="text-lg text-[var(--color-ink-muted)] leading-relaxed">
-                  {photo.description}
-                </p>
-              )}
-              <dl className="flex flex-wrap gap-x-8 gap-y-2 text-xs tracking-[0.14em] uppercase text-[var(--color-ink-subtle)]">
-                {photo.category && (
-                  <div>
-                    <dt className="sr-only">Category</dt>
-                    <dd>
-                      <Link
-                        to={`/gallery?category=${photo.category.slug}`}
-                        className="hover:text-[var(--color-ink)]"
-                      >
-                        {photo.category.name}
-                      </Link>
-                    </dd>
-                  </div>
-                )}
-                {photo.location && (
-                  <div>
-                    <dt className="sr-only">Location</dt>
-                    <dd>{photo.location}</dd>
-                  </div>
-                )}
-              </dl>
-
-              {series.length > 0 && (
-                <div className="pt-4 space-y-2">
-                  <p className="text-xs tracking-[0.14em] uppercase text-[var(--color-ink-subtle)]">
-                    In collections
+            <figcaption className="pl-film-edge">
+              <div className="pl-film-edge__ticks" aria-hidden>
+                <span /><span /><span /><span /><span />
+              </div>
+              <div className="space-y-3 min-w-0">
+                <h1
+                  className="text-3xl md:text-4xl text-[var(--color-ink)]"
+                  style={{ fontFamily: 'var(--font-display)' }}
+                >
+                  {photo.title}
+                </h1>
+                {photo.description && (
+                  <p className="text-lg text-[var(--color-ink-muted)] leading-relaxed">
+                    {photo.description}
                   </p>
-                  <ul className="flex flex-wrap gap-3">
-                    {series.map((c) => (
-                      <li key={c.id}>
+                )}
+                <dl className="flex flex-wrap gap-x-8 gap-y-2 text-xs tracking-[0.14em] uppercase text-[var(--color-ink-subtle)]">
+                  {photo.category && (
+                    <div>
+                      <dt className="sr-only">Category</dt>
+                      <dd>
                         <Link
-                          to={`/collections/${c.slug}`}
-                          className="text-sm border-b border-[var(--color-border)] hover:border-[var(--color-ink)]"
+                          to={`/gallery?category=${photo.category.slug}`}
+                          className="hover:text-[var(--color-ink)]"
                         >
-                          {c.title}
+                          {photo.category.name}
                         </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+                      </dd>
+                    </div>
+                  )}
+                  {photo.location && (
+                    <div>
+                      <dt className="sr-only">Location</dt>
+                      <dd>{photo.location}</dd>
+                    </div>
+                  )}
+                  {photo.takenAt && (
+                    <div>
+                      <dt className="sr-only">Date</dt>
+                      <dd>{new Date(photo.takenAt).getFullYear()}</dd>
+                    </div>
+                  )}
+                </dl>
+              </div>
+              <div className="pl-film-edge__ticks" aria-hidden>
+                <span /><span /><span /><span /><span />
+              </div>
             </figcaption>
           </figure>
         </div>
