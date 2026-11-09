@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { IconClose, IconMenu } from './icons/PhotologIcons'
 import { BackToTop } from './BackToTop'
+import { ExposureProgress } from './ui/ExposureProgress'
 import { useApi } from '../hooks/useApi'
 import type { SettingsResponse } from '../types/api'
 
@@ -117,46 +118,34 @@ export function SiteLayout() {
             </motion.nav>
           )}
         </AnimatePresence>
+        <ExposureProgress />
       </header>
 
       <main id="main-content" className="flex-1">
         <Outlet />
       </main>
 
-      <footer className="px-6 md:px-12 py-10 border-t border-[var(--color-border)]">
-        <div className="max-w-[72rem] mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="space-y-2">
-            <p
-              className="text-lg tracking-[0.04em] text-[var(--color-ink-muted)]"
-              style={{ fontFamily: 'var(--font-display)' }}
-            >
-              Photoblog
-            </p>
-            <p className="text-[0.7rem] tracking-[0.14em] uppercase text-[var(--color-ink-tertiary)]">
-              Photographs by Dnyanesh Pise
-            </p>
+      <footer className="pl-footer mt-auto">
+        <div className="pl-footer__inner">
+          <div>
+            <p className="pl-footer__mark">Photoblog</p>
+            <p className="pl-footer__sub">Photographs by Dnyanesh Pise</p>
           </div>
-
-          {social && Object.keys(social).length > 0 && (
-            <ul className="flex flex-wrap gap-5">
-              {Object.entries(social).map(([label, href]) => (
-                <li key={label}>
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[0.68rem] tracking-[0.14em] uppercase text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)]"
-                  >
-                    {label}
-                  </a>
-                </li>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            {social &&
+              Object.entries(social).map(([label, href]) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[0.65rem] font-medium tracking-[0.14em] uppercase text-[var(--color-ink-tertiary)] hover:text-[var(--color-ink)] transition-colors"
+                >
+                  {label}
+                </a>
               ))}
-            </ul>
-          )}
-
-          <p className="text-[0.7rem] tracking-[0.12em] uppercase text-[var(--color-ink-tertiary)]">
-            © {new Date().getFullYear()}
-          </p>
+            <p className="pl-footer__copy">© {new Date().getFullYear()}</p>
+          </div>
         </div>
       </footer>
 
