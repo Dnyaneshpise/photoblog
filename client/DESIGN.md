@@ -1,7 +1,7 @@
 # Photolog Design System
 
 **Authority for all client UI.** Original work for Photolog.  
-**License / ownership:** © Photolog — Dnyanesh Pise. All design tokens, motion, icons, and component language in this system are project-original and licensed under the project owner. Do not treat as generic template or third-party kit.
+**License / ownership:** © Photolog — Dnyanesh Pise. All design tokens, motion, icons, layouts, and component language in this system are project-original and licensed under the project owner. Do not treat as generic template or third-party kit.
 
 ## Stance
 
@@ -36,7 +36,9 @@ Paper grain overlay (fixed, low opacity) is intentional — tactile print feel.
 2. **Filmstrip** — horizontal snap scroll for recent selections.  
 3. **Bento** — asymmetric featured block on home.  
 4. **Mosaic** — gallery grid with mixed aspect rhythm (not equal tiles).  
-5. **Underline filters** — category links, not solid chips.
+5. **Underline filters** — category links, not solid chips.  
+6. **Plate** — collection card with optical inset frame and index mark.  
+7. **Film-edge meta** — photo detail caption strip with tick marks (analog edge feel).
 
 ## Motion (Photolog originals)
 
@@ -45,6 +47,10 @@ Paper grain overlay (fixed, low opacity) is intentional — tactile print feel.
 - **Viewfinder** — four corner ticks on photo hover.  
 - **Cover ken-burns** — soft scale-in on hero.  
 - **Lightbox** — fade + slight scale; counter `01 — 12` form.  
+- **Exposure progress** — thin ink line under masthead tracking scroll depth.  
+- **Shutter page** — brief opacity/y settle on route change (PageFade).  
+- **Optical rule** — section divider with centered hairline notch.  
+- **Aperture return** — circular back-to-top with rotating blade ring.  
 - Easings: `--ease-out-expo` `[0.16, 1, 0.3, 1]`, `--ease-pl` `[0.22, 1, 0.36, 1]`.  
 - Respect `prefers-reduced-motion`.
 
@@ -53,7 +59,10 @@ Paper grain overlay (fixed, low opacity) is intentional — tactile print feel.
 - `pl-*` CSS classes are the public design API.  
 - Icons: `PhotologIcons.tsx` only — no Lucide/Heroicons in public UI.  
 - Buttons: solid ink / ghost on cover / ink-ghost on paper.  
-- Forms: underline fields, uppercase micro labels.
+- Forms: underline fields, uppercase micro labels.  
+- `ExposureProgress` — scroll depth under masthead.  
+- `OpticalRule` — section separator.  
+- `BackToTop` — aperture-ring control.
 
 ## Commit discipline
 
