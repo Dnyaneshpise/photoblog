@@ -1,101 +1,64 @@
-/**
- * Photolog icon set — original SVG marks for this product.
- * Not derived from Lucide, Heroicons, or Feather.
- * License: project original (Photolog / Dnyanesh Pise).
- */
+/** Photolog original icon set — licensed under Photolog / Dnyanesh Pise. */
 
-import type { SVGProps } from 'react'
+type IconProps = { size?: number; className?: string }
 
-type IconProps = SVGProps<SVGSVGElement> & { size?: number }
-
-const base = {
-  fill: 'none' as const,
-  stroke: 'currentColor',
-  strokeWidth: 1.5,
-  strokeLinecap: 'round' as const,
-  strokeLinejoin: 'round' as const,
-}
-
-function frameProps(size: number, props: IconProps) {
-  const { size: _s, ...rest } = props
-  return {
-    width: size,
-    height: size,
-    viewBox: '0 0 24 24',
-    'aria-hidden': true as const,
-    ...base,
-    ...rest,
-  }
-}
-
-/** Three staggered lines — menu */
-export function IconMenu({ size = 22, ...props }: IconProps) {
+export function IconArrowLeft({ size = 20, className }: IconProps) {
   return (
-    <svg {...frameProps(size, props)}>
-      <path d="M4 7h16" />
-      <path d="M4 12h12" />
-      <path d="M4 17h16" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path d="M15 6L9 12L15 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" />
     </svg>
   )
 }
 
-/** Minimal close */
-export function IconClose({ size = 22, ...props }: IconProps) {
+export function IconArrowRight({ size = 20, className }: IconProps) {
   return (
-    <svg {...frameProps(size, props)}>
-      <path d="M6 6l12 12" />
-      <path d="M18 6L6 18" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path d="M9 6L15 12L9 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" />
     </svg>
   )
 }
 
-export function IconArrowRight({ size = 20, ...props }: IconProps) {
+export function IconClose({ size = 20, className }: IconProps) {
   return (
-    <svg {...frameProps(size, props)}>
-      <path d="M5 12h14" />
-      <path d="M13 6l6 6-6 6" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" />
     </svg>
   )
 }
 
-export function IconArrowLeft({ size = 20, ...props }: IconProps) {
+export function IconMenu({ size = 20, className }: IconProps) {
   return (
-    <svg {...frameProps(size, props)}>
-      <path d="M19 12H5" />
-      <path d="M11 6l-6 6 6 6" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path d="M4 7H20M4 12H20M4 17H20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" />
     </svg>
   )
 }
 
-/** External — corner tick unique to Photolog */
-export function IconExternal({ size = 18, ...props }: IconProps) {
+export function IconExternal({ size = 14, className }: IconProps) {
   return (
-    <svg {...frameProps(size, props)}>
-      <path d="M9 5h10v10" />
-      <path d="M19 5L9 15" />
-      <path d="M5 9v10h10" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path d="M9 5H19V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" />
+      <path d="M19 5L5 19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" />
     </svg>
   )
 }
 
-/** Gallery grid — uneven cells, not a standard 2x2 */
-export function IconGrid({ size = 20, ...props }: IconProps) {
+/** Film sprocket mark — Photolog original */
+export function IconFilm({ size = 16, className }: IconProps) {
   return (
-    <svg {...frameProps(size, props)}>
-      <rect x="4" y="4" width="7" height="7" rx="0.5" />
-      <rect x="13" y="4" width="7" height="4" rx="0.5" />
-      <rect x="13" y="10" width="7" height="10" rx="0.5" />
-      <rect x="4" y="13" width="7" height="7" rx="0.5" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <rect x="3" y="4" width="18" height="16" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M3 8H21M3 16H21M7 4V8M12 4V8M17 4V8M7 16V20M12 16V20M17 16V20" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   )
 }
 
-/** Frame mark — wordmark companion / brand glyph */
-export function IconFrame({ size = 24, ...props }: IconProps) {
+/** Simple aperture glyph — Photolog original */
+export function IconAperture({ size = 16, className }: IconProps) {
   return (
-    <svg {...frameProps(size, props)}>
-      <rect x="3.5" y="3.5" width="17" height="17" rx="0.5" />
-      <path d="M8 16.5V8h5.5" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M12 3L14.5 10H21L16 14.5L18 21L12 17L6 21L8 14.5L3 10H9.5L12 3Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
     </svg>
   )
 }
