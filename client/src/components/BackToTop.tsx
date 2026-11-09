@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 /**
- * Floating control to return to the top of long pages.
+ * Aperture return — Photolog original.
+ * Circular control; appears after scroll depth.
  */
 export function BackToTop() {
-  const [visible, setVisible] = useState(false)
+  const [show, setShow] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > 480)
+    const onScroll = () => setShow(window.scrollY > 480)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -16,18 +17,19 @@ export function BackToTop() {
 
   return (
     <AnimatePresence>
-      {visible && (
+      {show && (
         <motion.button
           type="button"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 12 }}
-          transition={{ duration: 0.25 }}
-          className="fixed bottom-6 right-6 z-30 px-4 py-3 text-[0.65rem] tracking-[0.16em] uppercase bg-[var(--color-ink)] text-[var(--color-canvas)] shadow-lg hover:opacity-90"
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="pl-aperture-return"
           aria-label="Back to top"
+          initial={{ opacity: 0, scale: 0.85 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
-          Top
+          <span className="pl-aperture-return__ring" aria-hidden />
+          <span className="pl-aperture-return__label">Top</span>
         </motion.button>
       )}
     </AnimatePresence>

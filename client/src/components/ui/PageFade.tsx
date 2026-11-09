@@ -1,23 +1,18 @@
-/**
- * PageFade — quiet enter animation for route content.
- * Uses Photolog easing; respects reduced motion via CSS.
- */
-
+import { motion } from 'framer-motion'
 import type { ReactNode } from 'react'
 
-type PageFadeProps = {
-  children: ReactNode
-  className?: string
-  delayMs?: number
-}
-
-export function PageFade({ children, className = '', delayMs = 0 }: PageFadeProps) {
+/**
+ * Shutter page settle — Photolog original route transition.
+ */
+export function PageFade({ children }: { children: ReactNode }) {
   return (
-    <div
-      className={`pl-fade-up ${className}`}
-      style={delayMs ? { animationDelay: `${delayMs}ms` } : undefined}
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -6 }}
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
     >
       {children}
-    </div>
+    </motion.div>
   )
 }
