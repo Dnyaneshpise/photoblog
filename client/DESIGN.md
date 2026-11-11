@@ -1,79 +1,214 @@
 # Photolog Design System
 
-**Authority for all client UI.** Original work for Photolog.  
-**License / ownership:** © Photolog — Dnyanesh Pise. All design tokens, motion, icons, layouts, and component language in this system are project-original and licensed under the project owner. Do not treat as generic template or third-party kit.
+**Authority for all client UI.**  
+**Exclusive Proprietary — Copyright © 2026 Dnyanesh Pise / Photolog. All Rights Reserved.**  
+Not MIT. Not Creative Commons. See `legal/PROPRIETARY_LICENSE.md`.
+
+This document is the single source of truth. Code and Figma follow it.
+
+**Canva** files are brand/mood boards only — not pixel specifications for the web app. Do not expect the live site to match Canva presentation styling 1:1. **Figma screen map + this file** define production UI.
+
+---
+
+## Contemporary premium (2026)
+
+- Clean gallery ground, not yellowed scrapbook.
+- Serif for display only; UI stays sharp sans.
+- Motion is precise, not theatrical analog cosplay.
+- Large images, generous air, minimal chrome.
+- Unique Photolog language remains — refined, not discarded.
 
 ## Stance
 
-- The photograph is the product. Chrome is quiet.
-- Editorial, not SaaS. Paper and ink, not glass and purple gradients.
-- Motion is short, purposeful, and ease-out — never delayed for spectacle.
-- Prefer optical judgment over rigid 8px grids when they fight the image.
+Photolog is a **contemporary editorial photography house** — refined, current, and quiet. Not a product dashboard, not a vintage prop set.
+
+1. **The photograph is the product.** Interface recedes.
+2. **Paper and ink** — warm ground, near-black type, hairline rules. No glass, no purple, no neon.
+3. **Optical judgment over grid dogma.** If an 8px grid fights the image, the image wins.
+4. **Motion is exposure, not entertainment.** Short, ease-out, purposeful.
+5. **Quiet premium.** Restraint reads as confidence; decoration reads as doubt.
+
+---
 
 ## Typography
 
-- **Display:** Instrument Serif — titles, wordmark, photo titles  
-- **Body / UI:** Instrument Sans — navigation, meta, forms  
-- Display tracking tight (−0.03em). Kickers uppercase, wide tracking (~0.2em).
+| Role | Face | Notes |
+|------|------|--------|
+| Display | **Instrument Serif** | Titles, wordmark, photo titles. Tracking −0.03em. Weight 400 only. |
+| Body / UI | **Instrument Sans** | Nav, meta, forms, body. |
+
+### Scale (preferred)
+
+| Token | Size | Use |
+|-------|------|-----|
+| display-xl | `clamp(2.5rem, 6vw, 4rem)` | Cover title, rare hero |
+| display-lg | `clamp(2.2rem, 5vw, 3.5rem)` | Page H1 |
+| display-md | `1.5–2rem` | Section titles |
+| body | `1rem` / 1.65 | Default |
+| lead | `1.05–1.15rem` / 1.65 | Intro paragraphs |
+| caption | `0.72rem` | Under-image |
+| kicker | `0.62rem` · tracking 0.2em · uppercase | Section labels |
+| meta | `0.62rem` · tracking 0.12–0.16em · uppercase | Dates, EXIF, nav |
+
+Measure: body ~55–65ch. Captions ≤36em. Never stretch display type.
+
+---
 
 ## Color
 
-| Token | Value | Use |
-|-------|-------|-----|
-| paper / canvas | `#efece6` | Page ground |
-| surface | `#f7f5f0` | Raised soft areas |
-| ink | `#0e0d0c` | Primary type |
+| Token | Hex | Role |
+|-------|-----|------|
+| paper / canvas | `#f4f3f0` | Page ground (clean gallery white-warm) |
+| surface | `#faf9f7` | Soft raised (plates) |
+| ink | `#0e0d0c` | Primary type & solid controls |
 | ink-secondary | `#3a3733` | Body secondary |
-| ink-tertiary | `#6a6660` | Meta, kickers |
+| ink-tertiary | `#6a6660` | Kickers, meta, idle nav |
 | rule | `#cfc9bf` | Hairlines |
-| night | `#0c0b0a` | Cover / lightbox |
+| rule-strong | `#a8a299` | Emphasized ticks |
+| night | `#0c0b0a` | Cover field, lightbox, filmstrip chrome |
 
-Paper grain overlay (fixed, low opacity) is intentional — tactile print feel.
+Paper grain is optional and very low (~1.8%) — presence, not aged paper nostalgia.  
+**Selection:** ink background, paper text.  
+**No accent hue.** Ink is the only “brand color.”
+
+---
 
 ## Layout patterns
 
-1. **Cover** — full-bleed featured image, bottom-aligned type, transparent masthead that solidifies on scroll.  
-2. **Filmstrip** — horizontal snap scroll for recent selections.  
-3. **Bento** — asymmetric featured block on home.  
-4. **Mosaic** — gallery grid with mixed aspect rhythm (not equal tiles).  
-5. **Underline filters** — category links, not solid chips.  
-6. **Plate** — collection card with optical inset frame and index mark.  
-7. **Film-edge meta** — photo detail caption strip with tick marks (analog edge feel).
+| Pattern | Where | Rule |
+|---------|-------|------|
+| Cover | Home | Full-bleed image, bottom-left type, scroll cue, optional edge veil |
+| Filmstrip | Home | Horizontal snap; ~3:4 cards; proof-like density |
+| Bento | Home | Asymmetric featured (1 large + 2 stack) |
+| Mosaic | Gallery, series | Mixed column spans — never equal Instagram tiles |
+| Plate | Collections | Inset optical frame + index `01` |
+| Film-edge | Photo detail | Sprocket ticks + title + meta |
+| Narrow column | About, Contact | `max-w-3xl` / `max-w-lg` — editorial, not wide blog |
+| 404 | Miss | Aperture mark only — no illustration |
 
-## Motion (Photolog originals)
+Content width: `max-w-[72rem]` for image-heavy pages.
 
-- **Aperture loader** — eight blades, staggered opacity.  
-- **Curtain reveal** — top-origin scaleY on image load.  
-- **Viewfinder** — four corner ticks on photo hover.  
-- **Cover ken-burns** — soft scale-in on hero.  
-- **Lightbox** — fade + slight scale; counter `01 — 12` form.  
-- **Exposure progress** — thin ink line under masthead tracking scroll depth.  
-- **Shutter page** — brief opacity/y settle on route change (PageFade).  
-- **Optical rule** — section divider with centered hairline notch.  
-- **Aperture return** — circular back-to-top with rotating blade ring.  
-- Easings: `--ease-out-expo` `[0.16, 1, 0.3, 1]`, `--ease-pl` `[0.22, 1, 0.36, 1]`.  
-- Respect `prefers-reduced-motion`.
+---
 
-## Components
+## Spacing
 
-- `pl-*` CSS classes are the public design API.  
-- Icons: `PhotologIcons.tsx` only — no Lucide/Heroicons in public UI.  
-- Buttons: solid ink / ghost on cover / ink-ghost on paper.  
-- Forms: underline fields, uppercase micro labels.  
-- `ExposureProgress` — scroll depth under masthead.  
-- `OpticalRule` — section separator.  
-- `BackToTop` — aperture-ring control.
+- Page pad X: `clamp(1.25rem, 4vw, 3rem)`
+- Section Y: 4–6rem major; 1.5–2rem within clusters
+- Mosaic gutter: 0.55–0.75rem
+- Diptych gutter: 0.65rem
+- Hairlines: **1px** only
+- Lift: **2px** max `translateY` — no card shadows
+
+---
+
+## Motion (proprietary)
+
+| Name | Spec |
+|------|------|
+| Aperture loader | 8 blades, staggered opacity, 1150ms |
+| Curtain reveal | scaleY top-origin ~850ms ease-out-expo |
+| Darkroom develop | opacity + contrast 900ms (paper → silver) |
+| Viewfinder | 4 corner ticks on photo hover |
+| Focus pull | Target sharp/scale; peers soft-blur |
+| Ken-burns | Cover only; ≤1.04 scale over ≥12s |
+| Lightbox | Night fade + slight scale; counter `01 — 12` |
+| Exposure progress | 2px ink under masthead, scroll-linked |
+| Page shutter | PageFade ~450ms |
+| Optical rule | Hairline + diamond notch |
+| Aperture return | Circular back-to-top |
+
+**Easings:**  
+`--ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1)`  
+`--ease-pl: cubic-bezier(0.22, 1, 0.36, 1)`
+
+Respect `prefers-reduced-motion` — kill loops and long transitions.
+
+---
+
+## Chrome
+
+### Masthead
+- Height ~4.25–4.75rem
+- Over home cover: transparent type on paper (inverse)
+- After scroll / inner pages: solid paper + bottom hairline
+- Nav: uppercase tracked links; **active = ink + underline**
+- Exposure bar sits under the hairline
+
+### Footer
+- Optical rule + small aperture mark
+- Proprietary copyright line (required)
+- Social as text links, not icon grids
+
+---
+
+## Components API (`pl-*`)
+
+Public classes are the design API. Prefer them over one-off Tailwind for brand surfaces.
+
+Buttons: `.pl-btn` · `.pl-btn-ghost` (on night) · `.pl-btn-ink-ghost` (on paper)  
+Fields: `.pl-field` underline · `.pl-label`  
+Filters: `.pl-filter` / `.is-active`  
+Links: `.pl-link` (grow underline)  
+Structure: `.pl-page` · `.pl-kicker` · `.pl-display` · `.pl-lead` · `.pl-cover*` · `.pl-strip` · `.pl-bento` · `.pl-mosaic` · `.pl-plate*` · `.pl-film-edge*` · `.pl-404*`
+
+Icons: **only** `PhotologIcons.tsx`.
+
+---
+
+## Micro-interactions
+
+| Element | Behavior |
+|---------|----------|
+| Nav link | Color + underline, no scale |
+| Filter | Border-bottom ink |
+| Photo | Viewfinder + optional focus-pull |
+| Button | Fill invert — never bounce |
+| Plate | 2px lift |
+| Wordmark | Static |
+
+---
+
+## Forbidden
+
+- Purple / indigo / “AI gradient” accents  
+- Glassmorphism, heavy backdrop-blur panels  
+- Elastic / bounce easing  
+- Equal-tile grids as default gallery  
+- Stock illustration empty states  
+- Inter, Roboto, or system UI as primary faces  
+- Animated logo loops  
+- Scrolljacking / loud parallax  
+- Permissive licenses (MIT/CC) on design assets  
+
+---
+
+## Routes
+
+See `legal/PAGE_SPECS.md` for zone-by-zone specs.
+
+| Path | Pattern |
+|------|---------|
+| `/` | Cover → rule → filmstrip → bento → plates |
+| `/gallery` | Archive → underline filters → mosaic |
+| `/photos/:id` | Return · image · film-edge · related |
+| `/collections` | Series → plate grid |
+| `/collections/:slug` | Series title → mosaic |
+| `/about` | Narrow · bio · statement · elsewhere |
+| `/contact` | Narrow form · underline fields |
+| `404` | Aperture · Home / Gallery |
+
+Figma: *Photolog Design System* — tokens, effects atelier, screen map.
+
+---
 
 ## Commit discipline
 
-- Max **one commit per day** on this project.  
-- Batch all design work into that single commit.  
-- Conventional commits (`feat` / `fix` / `docs` / `chore`). No “Day N” messages.
+- **Max one commit per day**
+- Batch design into that commit
+- Conventional commits only (`feat` / `fix` / `docs` / `chore`)
 
-## Do not
+---
 
-- Introduce Inter, Roboto, system-default “AI” stacks as primary UI.  
-- Add purple/blue SaaS accents.  
-- Equal 3-column grids as the only gallery layout.  
-- Loud parallax or scrolljacking.  
-- Commit multiple times in one calendar day.
+## Ownership
+
+Every token, motion, icon, layout pattern, and page structure in this system is **Exclusive Proprietary © 2026 Dnyanesh Pise / Photolog**. Unauthorized cloning of layout or effects is prohibited.

@@ -125,11 +125,17 @@ export function SiteLayout() {
         <Outlet />
       </main>
 
-      <footer className="pl-footer mt-auto">
+      <footer className="pl-footer">
         <div className="pl-footer__inner">
-          <div>
-            <p className="pl-footer__mark">Photoblog</p>
-            <p className="pl-footer__sub">Photographs by Dnyanesh Pise</p>
+          <div className="flex items-start gap-4">
+            <span className="pl-footer__mark" aria-hidden />
+            <div className="space-y-2">
+              <p className="pl-wordmark text-[1.05rem]">Photoblog</p>
+              <p className="pl-footer__copy">
+                Copyright © {new Date().getFullYear()} Dnyanesh Pise / Photolog. All Rights
+                Reserved. Unauthorized duplication of layout or visual effects is prohibited.
+              </p>
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             {social &&
@@ -139,12 +145,11 @@ export function SiteLayout() {
                   href={href}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-[0.65rem] font-medium tracking-[0.14em] uppercase text-[var(--color-ink-tertiary)] hover:text-[var(--color-ink)] transition-colors"
+                  className="pl-link text-[0.65rem] font-medium tracking-[0.14em] uppercase text-[var(--color-ink-tertiary)]"
                 >
                   {label}
                 </a>
               ))}
-            <p className="pl-footer__copy">© {new Date().getFullYear()}</p>
           </div>
         </div>
       </footer>
