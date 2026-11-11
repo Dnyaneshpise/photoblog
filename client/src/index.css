@@ -138,13 +138,14 @@ button { font-family: inherit; cursor: pointer; }
   padding: 0.9rem 1.55rem;
   font-size: 0.68rem; font-weight: 500;
   letter-spacing: 0.18em; text-transform: uppercase;
-  border: 1px solid color-mix(in srgb, var(--color-paper) 35%, transparent);
-  background: transparent; color: var(--color-paper);
+  border: 1px solid color-mix(in srgb, var(--color-paper) 55%, transparent);
+  background: color-mix(in srgb, var(--color-night) 35%, transparent);
+  color: var(--color-paper);
   transition: border-color 0.25s var(--ease-pl), background 0.25s var(--ease-pl);
 }
 .pl-btn-ghost:hover {
   border-color: var(--color-paper);
-  background: color-mix(in srgb, var(--color-paper) 10%, transparent);
+  background: color-mix(in srgb, var(--color-night) 55%, transparent);
 }
 .pl-btn-ink-ghost {
   display: inline-flex; align-items: center; gap: 0.55rem;
@@ -285,13 +286,22 @@ button { font-family: inherit; cursor: pointer; }
 .pl-cover__veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(12, 11, 10, 0.78) 0%,
-    rgba(12, 11, 10, 0.22) 50%,
-    rgba(12, 11, 10, 0.12) 100%
-  );
   pointer-events: none;
+  /* Dual-axis scrim: readable type on any photo (WCAG-minded) */
+  background:
+    linear-gradient(
+      to top,
+      rgba(12, 11, 10, 0.88) 0%,
+      rgba(12, 11, 10, 0.55) 28%,
+      rgba(12, 11, 10, 0.18) 55%,
+      rgba(12, 11, 10, 0.08) 100%
+    ),
+    linear-gradient(
+      to right,
+      rgba(12, 11, 10, 0.55) 0%,
+      rgba(12, 11, 10, 0.22) 42%,
+      transparent 68%
+    );
 }
 .pl-cover__content {
   position: relative;
@@ -299,16 +309,16 @@ button { font-family: inherit; cursor: pointer; }
   width: 100%;
   max-width: 72rem;
   margin: 0 auto;
-  padding: 2rem 1.5rem 3.5rem;
+  padding: 2rem 1.5rem 4rem;
   color: #faf9f7;
 }
 @media (min-width: 768px) {
-  .pl-cover__content { padding: 3rem 3rem 4.5rem; }
+  .pl-cover__content { padding: 3rem 3rem 5.5rem; }
 }
 .pl-cover__kicker {
   font-size: 0.65rem; font-weight: 500;
   letter-spacing: 0.22em; text-transform: uppercase;
-  color: color-mix(in srgb, #faf9f7 55%, transparent);
+  color: color-mix(in srgb, #faf9f7 78%, transparent);
   margin-bottom: 1rem;
 }
 .pl-cover__title {
@@ -318,13 +328,15 @@ button { font-family: inherit; cursor: pointer; }
   letter-spacing: -0.035em;
   max-width: 14ch;
   color: #faf9f7;
+  text-shadow: 0 1px 24px rgba(12, 11, 10, 0.45);
 }
 .pl-cover__lead {
   margin-top: 1.25rem;
-  max-width: 32rem;
+  max-width: 28rem;
   font-size: 1.05rem;
   line-height: 1.65;
-  color: color-mix(in srgb, #faf9f7 72%, transparent);
+  color: color-mix(in srgb, #faf9f7 88%, transparent);
+  text-shadow: 0 1px 12px rgba(12, 11, 10, 0.35);
 }
 .pl-cover__actions {
   margin-top: 1.75rem;
