@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { OpticalRule } from '../components/ui/OpticalRule'
 import { motion } from 'framer-motion'
 import { PhotoCard } from '../components/PhotoCard'
 import { StateBlock } from '../components/StateBlock'
@@ -36,10 +37,10 @@ export function HomePage() {
 
   return (
     <div>
-      <section className="pl-cover">
+      <section className="pl-cover is-live">
         <div className="pl-cover__media" aria-hidden={!cover}>
           {cover ? (
-            <img src={cover.imageUrl || cover.thumbnailUrl} alt="" />
+            <img src={cover.imageUrl || cover.thumbnailUrl || ''} alt="" />
           ) : (
             <div className="w-full h-full bg-[var(--color-night)]" />
           )}
@@ -75,8 +76,12 @@ export function HomePage() {
         </div>
       </section>
 
+      <div className="max-w-[72rem] mx-auto px-6 md:px-12">
+        <OpticalRule />
+      </div>
+
       {strip.length > 0 && (
-        <section className="px-6 md:px-12 py-14 md:py-20">
+        <section className="px-6 md:px-12 py-16 md:py-24">
           <div className="max-w-[72rem] mx-auto space-y-8">
             <div className="flex items-end justify-between gap-4">
               <div className="space-y-2">
@@ -93,7 +98,13 @@ export function HomePage() {
             </div>
             <div className="pl-strip">
               {strip.map((photo, i) => (
-                <PhotoCard key={photo.id} photo={photo} preferLightbox index={i} aspect="aspect-[3/4]" />
+                <PhotoCard
+                  key={photo.id}
+                  photo={photo}
+                  preferLightbox
+                  index={i}
+                  aspect="aspect-[3/4]"
+                />
               ))}
             </div>
           </div>
@@ -101,7 +112,7 @@ export function HomePage() {
       )}
 
       {bento.length > 0 && (
-        <section className="px-6 md:px-12 pb-16 md:pb-24">
+        <section className="px-6 md:px-12 pb-20 md:pb-28">
           <div className="max-w-[72rem] mx-auto space-y-10">
             <div className="space-y-2">
               <p className="pl-kicker">Featured</p>
@@ -115,7 +126,11 @@ export function HomePage() {
                   preferLightbox
                   index={i}
                   emphasis={i === 0}
-                  aspect={i === 0 ? 'aspect-[3/4] md:aspect-auto md:h-full md:min-h-[32rem]' : 'aspect-[4/3]'}
+                  aspect={
+                    i === 0
+                      ? 'aspect-[3/4] md:aspect-auto md:h-full md:min-h-[32rem]'
+                      : 'aspect-[4/3]'
+                  }
                 />
               ))}
             </div>
@@ -146,13 +161,20 @@ export function HomePage() {
                   initial={{ opacity: 0, y: 18 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-40px' }}
-                  transition={{ duration: 0.55, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{
+                    duration: 0.55,
+                    delay: i * 0.06,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
                 >
                   <Link to={`/collections/${collection.slug}`} className="pl-photo group block">
                     <div className="pl-photo__frame aspect-[3/2]">
                       {collection.coverPhoto ? (
                         <img
-                          src={collection.coverPhoto.thumbnailUrl || collection.coverPhoto.imageUrl}
+                          src={
+                            collection.coverPhoto.thumbnailUrl ||
+                            collection.coverPhoto.imageUrl
+                          }
                           alt={collection.coverPhoto.altText || collection.title}
                           loading="lazy"
                         />
@@ -164,7 +186,9 @@ export function HomePage() {
                     </div>
                     <div className="pl-photo__meta">
                       <h3 className="pl-photo__title">{collection.title}</h3>
-                      <span className="pl-photo__cat">{collection.publishedPhotoCount} photographs</span>
+                      <span className="pl-photo__cat">
+                        {collection.publishedPhotoCount} photographs
+                      </span>
                     </div>
                   </Link>
                 </motion.div>
