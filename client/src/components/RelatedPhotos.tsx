@@ -8,31 +8,30 @@ type RelatedPhotosProps = {
 
 /**
  * Suggests other published frames after viewing a single photograph.
+ * Spec: 4–6 related thumbs under photo detail.
  */
 export function RelatedPhotos({ photos, currentId }: RelatedPhotosProps) {
-  const related = photos.filter((p) => p.id !== currentId).slice(0, 3)
+  const related = photos.filter((p) => p.id !== currentId).slice(0, 6)
   if (related.length === 0) return null
 
   return (
-    <section className="max-w-5xl mx-auto px-6 md:px-12 pb-20 md:pb-28 space-y-8">
+    <section className="max-w-[72rem] mx-auto px-6 md:px-12 pb-20 md:pb-28 space-y-8">
       <div className="flex items-end justify-between gap-4">
-        <h2
-          className="text-2xl md:text-3xl text-[var(--color-ink)]"
-          style={{ fontFamily: 'var(--font-display)' }}
-        >
-          More from the archive
-        </h2>
+        <div className="space-y-2">
+          <p className="pl-kicker">Related frames</p>
+          <h2 className="pl-display text-[clamp(1.5rem,3vw,2rem)]">More from the archive</h2>
+        </div>
         <Link
           to="/gallery"
-          className="text-xs tracking-[0.16em] uppercase text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)]"
+          className="text-[0.68rem] tracking-[0.16em] uppercase text-[var(--color-ink-tertiary)] hover:text-[var(--color-ink)]"
         >
           Gallery
         </Link>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5">
         {related.map((photo) => (
-          <Link key={photo.id} to={`/gallery/${photo.id}`} className="group block space-y-3">
-            <div className="overflow-hidden bg-[var(--color-border)] aspect-[4/3]">
+          <Link key={photo.id} to={`/gallery/${photo.id}`} className="group block space-y-2">
+            <div className="overflow-hidden bg-[var(--color-surface)] aspect-[4/5]">
               <img
                 src={photo.thumbnailUrl || photo.imageUrl}
                 alt={photo.altText || photo.title}
@@ -40,9 +39,7 @@ export function RelatedPhotos({ photos, currentId }: RelatedPhotosProps) {
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
               />
             </div>
-            <p className="text-lg" style={{ fontFamily: 'var(--font-display)' }}>
-              {photo.title}
-            </p>
+            <p className="pl-display text-[0.95rem] leading-snug line-clamp-2">{photo.title}</p>
           </Link>
         ))}
       </div>

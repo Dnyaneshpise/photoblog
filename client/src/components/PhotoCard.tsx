@@ -41,6 +41,21 @@ export function PhotoCard({
         alt={alt}
         loading="lazy"
         onLoad={() => setLoaded(true)}
+        onError={(e) => {
+          // Quiet fallback when a remote demo URL fails — keeps the mosaic intact.
+          const el = e.currentTarget
+          el.style.display = 'none'
+          const parent = el.parentElement
+          if (parent && !parent.querySelector('[data-fallback]')) {
+            const fb = document.createElement('div')
+            fb.dataset.fallback = '1'
+            fb.className =
+              'absolute inset-0 flex items-center justify-center text-[0.62rem] tracking-[0.14em] uppercase text-[var(--color-ink-tertiary)] bg-[var(--color-surface)]'
+            fb.textContent = 'Unavailable'
+            parent.appendChild(fb)
+            setLoaded(true)
+          }
+        }}
       />
       <span className="pl-photo__veil" aria-hidden />
     </div>
