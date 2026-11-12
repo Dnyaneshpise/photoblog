@@ -18,6 +18,8 @@ export type Photo = {
   width: number | null
   height: number | null
   location: string | null
+  /** Capture date from camera / admin metadata (API: capturedAt) */
+  capturedAt?: string | null
   isFeatured: boolean
   sortOrder: number
   category: CategorySummary | null
