@@ -90,7 +90,6 @@ button { font-family: inherit; cursor: pointer; }
   border-color: var(--color-paper);
   background: color-mix(in srgb, var(--color-night) 55%, transparent);
 }
-/* Cover CTAs — never dissolve into the photograph */
 .pl-cover .pl-btn {
   background: var(--color-paper);
   color: var(--color-ink);
@@ -330,22 +329,258 @@ button { font-family: inherit; cursor: pointer; }
   background: var(--color-rule);
 }
 
+/* —— Header / footer chrome (premium) © Photolog —— */
+
 .pl-masthead {
-  position: sticky; top: 0; z-index: 40;
-  transition: background 0.3s var(--ease-pl), color 0.3s var(--ease-pl);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  transition:
+    background-color 0.35s var(--ease-pl),
+    border-color 0.35s var(--ease-pl),
+    color 0.35s var(--ease-pl);
 }
 .pl-masthead.is-solid {
-  background: color-mix(in srgb, var(--color-canvas) 92%, transparent);
-  backdrop-filter: blur(10px);
+  background: var(--color-canvas);
   border-bottom: 1px solid var(--color-rule);
+  color: var(--color-ink);
 }
 .pl-masthead.is-over-cover {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
   background: transparent;
-  color: #f7f5f0;
+  border-bottom: 1px solid transparent;
+  color: #faf9f7;
 }
-.pl-masthead.is-over-cover .pl-nav-link { color: color-mix(in srgb, #f7f5f0 75%, transparent); }
-.pl-masthead.is-over-cover .pl-nav-link.is-active,
-.pl-masthead.is-over-cover .pl-nav-link:hover { color: #f7f5f0; }
-.pl-masthead.is-over-cover .pl-wordmark { color: #f7f5f0; }
+.pl-masthead__bar {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 4.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+@media (min-width: 768px) {
+  .pl-masthead__bar {
+    padding: 0 3rem;
+    height: 4.75rem;
+  }
+}
+.pl-masthead__nav {
+  display: none;
+  align-items: center;
+  gap: 2.25rem;
+}
+@media (min-width: 768px) {
+  .pl-masthead__nav { display: flex; }
+}
+.pl-masthead__menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  margin-right: -0.35rem;
+  background: transparent;
+  border: none;
+  color: var(--color-ink);
+}
+.pl-masthead__menu.is-light { color: #faf9f7; }
+@media (min-width: 768px) {
+  .pl-masthead__menu { display: none; }
+}
+.pl-masthead__mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.75rem 1.5rem 1.25rem;
+  border-top: 1px solid var(--color-rule);
+  background: var(--color-canvas);
+  overflow: hidden;
+}
+@media (min-width: 768px) {
+  .pl-masthead__mobile { display: none; }
+}
 
-.pl-wordmark { font-family: var(--font-display); }
+.pl-wordmark {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+  color: inherit;
+  text-decoration: none;
+  line-height: 1;
+}
+@media (min-width: 768px) {
+  .pl-wordmark { font-size: 1.5rem; }
+}
+
+.pl-nav-link {
+  position: relative;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ink-tertiary);
+  padding: 0.25rem 0;
+  transition: color 0.2s var(--ease-pl);
+}
+.pl-nav-link:hover,
+.pl-nav-link.is-active {
+  color: var(--color-ink);
+}
+.pl-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.15rem;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s var(--ease-out-expo);
+  opacity: 0.85;
+}
+.pl-nav-link:hover::after,
+.pl-nav-link.is-active::after {
+  transform: scaleX(1);
+}
+.pl-masthead.is-over-cover .pl-nav-link {
+  color: color-mix(in srgb, #faf9f7 72%, transparent);
+}
+.pl-masthead.is-over-cover .pl-nav-link:hover,
+.pl-masthead.is-over-cover .pl-nav-link.is-active {
+  color: #faf9f7;
+}
+.pl-masthead.is-over-cover .pl-wordmark {
+  color: #faf9f7;
+}
+.pl-masthead__mobile .pl-nav-link {
+  color: var(--color-ink-tertiary);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  padding: 0.55rem 0;
+}
+.pl-masthead__mobile .pl-nav-link.is-active,
+.pl-masthead__mobile .pl-nav-link:hover {
+  color: var(--color-ink);
+}
+
+.pl-exposure {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.pl-exposure__fill {
+  height: 100%;
+  width: 100%;
+  background: var(--color-ink);
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 0.08s linear;
+  opacity: 0.5;
+}
+.pl-masthead.is-over-cover .pl-exposure__fill {
+  background: #faf9f7;
+  opacity: 0.4;
+}
+
+.pl-footer {
+  margin-top: auto;
+  padding: 0 0 2.5rem;
+  background: var(--color-canvas);
+}
+.pl-footer__rule {
+  height: 1px;
+  background: var(--color-rule);
+  margin-bottom: 2.5rem;
+}
+.pl-footer__inner {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: grid;
+  gap: 2rem;
+}
+@media (min-width: 768px) {
+  .pl-footer__inner {
+    padding: 0 3rem;
+    grid-template-columns: 1.4fr 1fr 1.2fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+}
+.pl-footer__brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+}
+.pl-footer__mark {
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 50%;
+  position: relative;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+.pl-footer__mark::after {
+  content: "";
+  position: absolute;
+  inset: 32%;
+  border-radius: 50%;
+  background: var(--color-rule);
+}
+.pl-footer__title {
+  font-size: 1.15rem;
+  display: inline-block;
+  margin-bottom: 0.35rem;
+}
+.pl-footer__tag {
+  font-size: 0.72rem;
+  color: var(--color-ink-secondary);
+  line-height: 1.45;
+}
+.pl-footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1.35rem;
+}
+@media (min-width: 768px) {
+  .pl-footer__nav {
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+}
+.pl-footer__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  align-items: flex-start;
+}
+.pl-footer__link {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-tertiary);
+  transition: color 0.2s var(--ease-pl);
+}
+.pl-footer__link:hover {
+  color: var(--color-ink);
+}
+.pl-footer__copy {
+  margin-top: 0.35rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  color: var(--color-ink-tertiary);
+  max-width: 22rem;
+}
