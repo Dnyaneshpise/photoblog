@@ -16,7 +16,8 @@ const links = [
 ] as const
 
 /**
- * Public site chrome — masthead, nav, footer with optional social links from API.
+ * Public site chrome — premium masthead + footer.
+ * © 2026 Dnyanesh Pise / Photolog. All Rights Reserved.
  */
 export function SiteLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -27,7 +28,7 @@ export function SiteLayout() {
   const social = settings.data?.data?.socialLinks ?? null
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 48)
+    const onScroll = () => setScrolled(window.scrollY > 40)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -41,12 +42,7 @@ export function SiteLayout() {
   const mastClass = ['pl-masthead', overCover ? 'is-over-cover' : 'is-solid'].join(' ')
 
   const navClass = ({ isActive }: { isActive: boolean }) =>
-    [
-      'pl-nav-link text-[0.68rem] font-medium tracking-[0.16em] uppercase transition-colors duration-200',
-      isActive
-        ? 'is-active text-[var(--color-ink)]'
-        : 'text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)]',
-    ].join(' ')
+    ['pl-nav-link', isActive ? 'is-active' : ''].filter(Boolean).join(' ')
 
   return (
     <div className="min-h-screen flex flex-col relative">
@@ -58,15 +54,12 @@ export function SiteLayout() {
       </a>
 
       <header className={mastClass}>
-        <div className="max-w-[72rem] mx-auto px-6 md:px-12 h-[4.25rem] md:h-[4.75rem] flex items-center justify-between gap-8">
-          <Link
-            to="/"
-            className="pl-wordmark pl-display text-[1.35rem] md:text-[1.5rem] tracking-[0.02em]"
-          >
+        <div className="pl-masthead__bar">
+          <Link to="/" className="pl-wordmark">
             Photoblog
           </Link>
 
-          <nav className="hidden md:flex items-center gap-9" aria-label="Primary">
+          <nav className="pl-masthead__nav" aria-label="Primary">
             {links.map((link) => (
               <NavLink
                 key={link.to}
@@ -81,9 +74,7 @@ export function SiteLayout() {
 
           <button
             type="button"
-            className={`md:hidden flex items-center justify-center p-1.5 -mr-1.5 ${
-              overCover ? 'text-[#f7f5f0]' : 'text-[var(--color-ink)]'
-            }`}
+            className={`pl-masthead__menu ${overCover ? 'is-light' : ''}`}
             aria-expanded={menuOpen}
             aria-controls="mobile-nav"
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
@@ -97,11 +88,11 @@ export function SiteLayout() {
           {menuOpen && (
             <motion.nav
               id="mobile-nav"
-              className="md:hidden border-t border-[var(--color-border)] bg-[var(--color-canvas)] px-6 py-6 flex flex-col gap-4"
+              className="pl-masthead__mobile"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
               aria-label="Mobile"
             >
               {links.map((link) => (
@@ -126,18 +117,27 @@ export function SiteLayout() {
       </main>
 
       <footer className="pl-footer">
+        <div className="pl-footer__rule" aria-hidden />
         <div className="pl-footer__inner">
-          <div className="flex items-start gap-4">
+          <div className="pl-footer__brand">
             <span className="pl-footer__mark" aria-hidden />
-            <div className="space-y-2">
-              <p className="pl-wordmark text-[1.05rem]">Photoblog</p>
-              <p className="pl-footer__copy">
-                Copyright © {new Date().getFullYear()} Dnyanesh Pise / Photolog. All Rights
-                Reserved. Unauthorized duplication of layout or visual effects is prohibited.
-              </p>
+            <div className="pl-footer__brand-text">
+              <Link to="/" className="pl-wordmark pl-footer__title">
+                Photoblog
+              </Link>
+              <p className="pl-footer__tag">Photographs by Dnyanesh Pise</p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+
+          <nav className="pl-footer__nav" aria-label="Footer">
+            {links.map((link) => (
+              <Link key={link.to} to={link.to} className="pl-footer__link">
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="pl-footer__meta">
             {social &&
               Object.entries(social).map(([label, href]) => (
                 <a
@@ -145,11 +145,14 @@ export function SiteLayout() {
                   href={href}
                   target="_blank"
                   rel="noreferrer"
-                  className="pl-link text-[0.65rem] font-medium tracking-[0.14em] uppercase text-[var(--color-ink-tertiary)]"
+                  className="pl-footer__link"
                 >
                   {label}
                 </a>
               ))}
+            <p className="pl-footer__copy">
+              © {new Date().getFullYear()} Dnyanesh Pise / Photolog. All Rights Reserved.
+            </p>
           </div>
         </div>
       </footer>
