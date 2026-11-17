@@ -9,7 +9,6 @@ type PhotoCardProps = {
   preferLightbox?: boolean
   index?: number
   aspect?: string
-  /** When set with preferLightbox, parent owns the lightbox (gallery nav). */
   onOpenLightbox?: (photo: Photo) => void
 }
 
@@ -42,7 +41,6 @@ export function PhotoCard({
         loading="lazy"
         onLoad={() => setLoaded(true)}
         onError={(e) => {
-          // Quiet fallback when a remote demo URL fails — keeps the mosaic intact.
           const el = e.currentTarget
           el.style.display = 'none'
           const parent = el.parentElement
@@ -89,16 +87,23 @@ export function PhotoCard({
       )}
 
       <figcaption className="pl-photo__meta">
-        {preferLightbox && onOpenLightbox ? (
-          <button type="button" className="pl-photo__title text-left" onClick={open}>
-            {photo.title}
-          </button>
-        ) : (
-          <Link to={`/gallery/${photo.id}`} className="pl-photo__title">
-            {photo.title}
-          </Link>
+        <div className="min-w-0 space-y-1">
+          {preferLightbox && onOpenLightbox ? (
+            <button type="button" className="pl-photo__title text-left" onClick={open}>
+              {photo.title}
+            </button>
+          ) : (
+            <Link to={`/gallery/${photo.id}`} className="pl-photo__title">
+              {photo.title}
+            </Link>
+          )}
+          {photo.category && <span className="pl-photo__cat">{photo.category.name}</span>}
+        </div>
+        {typeof index === 'number' && (
+          <span className="pl-proof shrink-0" aria-hidden>
+            {String(index + 1).padStart(2, '0')}
+          </span>
         )}
-        {photo.category && <span className="pl-photo__cat">{photo.category.name}</span>}
       </figcaption>
     </motion.figure>
   )

@@ -16,7 +16,8 @@ type LightboxProps = {
 }
 
 /**
- * Cinematic full-viewport viewer — Photolog original motion.
+ * Cinematic full-viewport viewer — Photolog original.
+ * © 2026 Dnyanesh Pise / Photolog. All Rights Reserved.
  */
 export function Lightbox({
   open,
@@ -58,11 +59,11 @@ export function Lightbox({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0b0a]/96 p-5 md:p-12"
+          className="pl-lightbox"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
           onClick={onClose}
           role="dialog"
           aria-modal="true"
@@ -71,7 +72,7 @@ export function Lightbox({
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-5 right-5 md:top-8 md:right-8 text-[#f2f0eb]/55 hover:text-[#f2f0eb] transition-colors p-2 z-10"
+            className="pl-lightbox__close"
             aria-label="Close"
           >
             <IconClose size={22} />
@@ -81,7 +82,7 @@ export function Lightbox({
             <>
               <button
                 type="button"
-                className="absolute left-3 md:left-8 top-1/2 -translate-y-1/2 text-[#f2f0eb]/55 hover:text-[#f2f0eb] p-2 disabled:opacity-25 transition-colors z-10"
+                className="pl-lightbox__nav pl-lightbox__nav--prev"
                 onClick={(e) => {
                   e.stopPropagation()
                   onPrev?.()
@@ -89,11 +90,11 @@ export function Lightbox({
                 aria-label="Previous photograph"
                 disabled={!onPrev}
               >
-                <IconArrowLeft size={28} />
+                <IconArrowLeft size={26} />
               </button>
               <button
                 type="button"
-                className="absolute right-3 md:right-8 top-1/2 -translate-y-1/2 text-[#f2f0eb]/55 hover:text-[#f2f0eb] p-2 disabled:opacity-25 transition-colors z-10"
+                className="pl-lightbox__nav pl-lightbox__nav--next"
                 onClick={(e) => {
                   e.stopPropagation()
                   onNext?.()
@@ -101,34 +102,23 @@ export function Lightbox({
                 aria-label="Next photograph"
                 disabled={!onNext}
               >
-                <IconArrowRight size={28} />
+                <IconArrowRight size={26} />
               </button>
             </>
           )}
 
           <motion.figure
-            className="relative max-w-6xl w-full"
+            className="pl-lightbox__figure"
             key={src}
-            initial={{ opacity: 0, scale: 0.98, y: 10 }}
+            initial={{ opacity: 0, scale: 0.985, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.99, y: 6 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
             onClick={(e) => e.stopPropagation()}
           >
-            <img
-              src={src}
-              alt={alt}
-              className="w-full max-h-[78vh] object-contain mx-auto"
-            />
-            <figcaption className="mt-6 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2 px-1">
-              {title && (
-                <p
-                  className="text-[#f2f0eb]/88 text-lg md:text-xl tracking-[-0.02em]"
-                  style={{ fontFamily: 'var(--font-display)' }}
-                >
-                  {title}
-                </p>
-              )}
+            <img src={src} alt={alt} className="pl-lightbox__img" />
+            <figcaption className="pl-lightbox__cap">
+              {title && <p className="pl-lightbox__title">{title}</p>}
               {counter && <p className="pl-lb-counter">{counter}</p>}
             </figcaption>
           </motion.figure>
