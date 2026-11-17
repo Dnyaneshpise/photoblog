@@ -9,17 +9,20 @@ export function NotFoundPage() {
   return (
     <div className="pl-page">
       <motion.div
-        className="max-w-xl mx-auto space-y-8 py-16 md:py-24"
+        className="pl-404"
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
       >
+        <div className="pl-404__mark" aria-hidden />
         <p className="pl-kicker">404</p>
-        <h1 className="pl-display text-[clamp(2.2rem,5vw,3.25rem)]">This page is not in the archive.</h1>
-        <p className="pl-lead">
+        <h1 className="pl-display text-[clamp(2.1rem,5vw,3.1rem)] max-w-md">
+          This page is not in the archive.
+        </h1>
+        <p className="pl-lead max-w-sm mx-auto text-center">
           The frame you asked for may have moved, or the link is incomplete.
         </p>
-        <Link to="/" className="pl-btn inline-flex">
+        <Link to="/" className="pl-btn inline-flex mt-2">
           Return home
           <IconArrowRight size={14} />
         </Link>

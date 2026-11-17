@@ -6,16 +6,21 @@ type StateBlockProps = {
   loading?: boolean
 }
 
+/**
+ * Quiet empty / loading / error state — Photolog.
+ */
 export function StateBlock({ title, detail, loading = false }: StateBlockProps) {
   return (
-    <div className="max-w-md mx-auto px-6 py-28 text-center space-y-6">
-      {loading && (
-        <div className="flex justify-center">
+    <div className="pl-empty">
+      {loading ? (
+        <div className="flex justify-center mb-2">
           <ApertureLoader label={title} />
         </div>
+      ) : (
+        <div className="pl-empty__mark" aria-hidden />
       )}
-      <p className="pl-display text-2xl md:text-3xl">{title}</p>
-      {detail && <p className="text-[var(--color-ink-secondary)] leading-relaxed">{detail}</p>}
+      <p className="pl-empty__title">{title}</p>
+      {detail && <p className="pl-empty__body">{detail}</p>}
     </div>
   )
 }
