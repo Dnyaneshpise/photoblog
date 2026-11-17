@@ -1,18 +1,26 @@
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { StateBlock } from '../components/StateBlock'
 import { IconExternal } from '../components/icons/PhotologIcons'
 import { useApi } from '../hooks/useApi'
-import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useSeoMeta } from '../hooks/useSeoMeta'
 import type { SettingsResponse } from '../types/api'
 
+/**
+ * About — biography, statement, and elsewhere links from portfolio settings.
+ */
 export function AboutPage() {
-  useDocumentTitle('About — Photoblog')
   const { data, error, loading } = useApi<SettingsResponse>('/api/settings')
+  const s = data?.data
+
+  useSeoMeta({
+    title: s ? `About — ${s.photographerName}` : 'About — Photoblog',
+    description: s?.biography || s?.tagline || 'About the photographer.',
+    image: s?.profileImageUrl,
+  })
 
   if (loading) return <StateBlock title="Loading" detail="Reading the profile…" loading />
   if (error) return <StateBlock title="Unable to load" detail={error} />
-
-  const s = data?.data
   if (!s) return <StateBlock title="Unavailable" detail="Settings have not been configured." />
 
   const social = s.socialLinks ?? {}
@@ -21,14 +29,25 @@ export function AboutPage() {
     <div className="pl-page">
       <div className="max-w-3xl mx-auto space-y-14 md:space-y-20">
         <motion.header
-          className="space-y-5"
-          initial={{ opacity: 0, y: 18 }}
+          className="pl-page-intro"
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           <p className="pl-kicker">About</p>
-          <h1 className="pl-display text-[clamp(2.2rem,5vw,3.5rem)]">{s.photographerName}</h1>
-          {s.tagline && <p className="pl-lead max-w-xl">{s.tagline}</p>}
+          <h1 className="pl-display">{s.photographerName}</h1>
+          {s.tagline && <p className="pl-lead">{s.tagline}</p>}
+          {s.profileImageUrl && (
+            <div className="pt-4 max-w-sm">
+              <div className="aspect-[4/5] overflow-hidden bg-[var(--color-surface)]">
+                <img
+                  src={s.profileImageUrl}
+                  alt={s.photographerName}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+          )}
         </motion.header>
 
         {s.biography && (
@@ -63,21 +82,21 @@ export function AboutPage() {
 
         {Object.keys(social).length > 0 && (
           <motion.section
-            className="space-y-5 border-t border-[var(--color-rule)] pt-12 md:pt-16"
+            className="space-y-4 border-t border-[var(--color-rule)] pt-12 md:pt-16"
             initial={{ opacity: 0, y: 14 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
           >
             <h2 className="pl-kicker">Elsewhere</h2>
-            <ul className="flex flex-wrap gap-x-8 gap-y-4">
+            <ul className="flex flex-wrap gap-x-6 gap-y-3">
               {Object.entries(social).map(([label, href]) => (
                 <li key={label}>
                   <a
                     href={href}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 text-[0.7rem] font-medium tracking-[0.14em] uppercase text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] transition-colors"
+                    className="inline-flex items-center gap-2 text-[0.68rem] tracking-[0.14em] uppercase text-[var(--color-ink-tertiary)] hover:text-[var(--color-ink)]"
                   >
                     {label}
                     <IconExternal size={12} />
@@ -87,6 +106,12 @@ export function AboutPage() {
             </ul>
           </motion.section>
         )}
+
+        <div className="pt-4">
+          <Link to="/contact" className="pl-btn inline-flex">
+            Write a note
+          </Link>
+        </div>
       </div>
     </div>
   )

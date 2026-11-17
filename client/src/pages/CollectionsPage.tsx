@@ -19,14 +19,14 @@ export function CollectionsPage() {
     <div className="pl-page">
       <div className="max-w-[72rem] mx-auto space-y-12 md:space-y-16">
         <motion.header
-          className="max-w-2xl space-y-5"
-          initial={{ opacity: 0, y: 18 }}
+          className="pl-page-intro"
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           <p className="pl-kicker">Collections</p>
-          <h1 className="pl-display text-[clamp(2.2rem,5vw,3.5rem)]">Bodies of work</h1>
-          <p className="pl-lead max-w-lg">
+          <h1 className="pl-display">Bodies of work</h1>
+          <p className="pl-lead">
             Series gathered with intent — each plate a sequence, not a folder.
           </p>
         </motion.header>
@@ -36,7 +36,7 @@ export function CollectionsPage() {
         {collections.length === 0 ? (
           <StateBlock title="No collections" detail="Published series will appear here." />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-14 md:gap-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-20">
             {collections.map((collection, i) => (
               <motion.div
                 key={collection.id}
