@@ -5,15 +5,34 @@ import { PhotoCard } from '../components/PhotoCard'
 import { StateBlock } from '../components/StateBlock'
 import { IconArrowRight } from '../components/icons/PhotologIcons'
 import { useApi } from '../hooks/useApi'
-import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useSeoMeta } from '../hooks/useSeoMeta'
 import type { CollectionsResponse, PhotosResponse, SettingsResponse } from '../types/api'
 
+/**
+ * Editorial home — cover, filmstrip, bento, collections teaser, quiet close.
+ */
 export function HomePage() {
-  useDocumentTitle('Photoblog — Dnyanesh Pise')
-
   const settings = useApi<SettingsResponse>('/api/settings')
   const featured = useApi<PhotosResponse>('/api/photos?featured=true&limit=8')
   const collections = useApi<CollectionsResponse>('/api/collections')
+
+  const profile = settings.data?.data
+  const photos = featured.data?.data ?? []
+  const series = collections.data?.data ?? []
+  const cover = photos[0]
+  const strip = photos.slice(0, 6)
+  const bento = photos.slice(1, 4)
+
+  useSeoMeta({
+    title: profile
+      ? `${profile.photographerName} — Photoblog`
+      : 'Photoblog — Dnyanesh Pise',
+    description:
+      profile?.homepageIntro ||
+      profile?.tagline ||
+      'A photography portfolio — light, quiet streets, and frames that hold still.',
+    image: cover?.imageUrl,
+  })
 
   if (settings.loading || featured.loading) {
     return <StateBlock title="Loading" detail="Gathering photographs…" loading />
@@ -27,13 +46,6 @@ export function HomePage() {
       />
     )
   }
-
-  const profile = settings.data?.data
-  const photos = featured.data?.data ?? []
-  const series = collections.data?.data ?? []
-  const cover = photos[0]
-  const strip = photos.slice(0, 6)
-  const bento = photos.slice(1, 4)
 
   return (
     <div>
@@ -81,12 +93,12 @@ export function HomePage() {
       </div>
 
       {strip.length > 0 && (
-        <section className="px-6 md:px-12 py-16 md:py-24">
-          <div className="max-w-[72rem] mx-auto space-y-8">
+        <section className="px-6 md:px-12 py-18 md:py-28">
+          <div className="max-w-[72rem] mx-auto space-y-9">
             <div className="flex items-end justify-between gap-4">
               <div className="space-y-2">
                 <p className="pl-kicker">Frames</p>
-                <h2 className="pl-display text-2xl md:text-3xl">Recent selections</h2>
+                <h2 className="pl-display text-[1.75rem] md:text-[2.15rem]">Recent selections</h2>
               </div>
               <Link
                 to="/gallery"
@@ -98,13 +110,7 @@ export function HomePage() {
             </div>
             <div className="pl-strip">
               {strip.map((photo, i) => (
-                <PhotoCard
-                  key={photo.id}
-                  photo={photo}
-                  preferLightbox
-                  index={i}
-                  aspect="aspect-[3/4]"
-                />
+                <PhotoCard key={photo.id} photo={photo} index={i} aspect="aspect-[3/4]" />
               ))}
             </div>
           </div>
@@ -116,14 +122,13 @@ export function HomePage() {
           <div className="max-w-[72rem] mx-auto space-y-10">
             <div className="space-y-2">
               <p className="pl-kicker">Featured</p>
-              <h2 className="pl-display text-2xl md:text-3xl">In focus</h2>
+              <h2 className="pl-display text-[1.75rem] md:text-[2.15rem]">In focus</h2>
             </div>
             <div className="pl-bento">
               {bento.map((photo, i) => (
                 <PhotoCard
                   key={photo.id}
                   photo={photo}
-                  preferLightbox
                   index={i}
                   emphasis={i === 0}
                   aspect={
@@ -139,12 +144,12 @@ export function HomePage() {
       )}
 
       {!collections.loading && series.length > 0 && (
-        <section className="border-t border-[var(--color-rule)] px-6 md:px-12 py-16 md:py-24">
+        <section className="border-t border-[var(--color-rule)] px-6 md:px-12 py-18 md:py-28">
           <div className="max-w-[72rem] mx-auto space-y-12">
             <div className="flex items-end justify-between gap-6">
               <div className="space-y-2">
                 <p className="pl-kicker">Series</p>
-                <h2 className="pl-display text-2xl md:text-3xl">Collections</h2>
+                <h2 className="pl-display text-[1.75rem] md:text-[2.15rem]">Collections</h2>
               </div>
               <Link
                 to="/collections"
@@ -154,26 +159,23 @@ export function HomePage() {
                 <IconArrowRight size={13} />
               </Link>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
               {series.slice(0, 4).map((collection, i) => (
                 <motion.div
                   key={collection.id}
                   initial={{ opacity: 0, y: 18 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-40px' }}
-                  transition={{
-                    duration: 0.55,
-                    delay: i * 0.06,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
+                  transition={{ duration: 0.55, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <Link to={`/collections/${collection.slug}`} className="pl-photo group block">
-                    <div className="pl-photo__frame aspect-[3/2]">
+                  <Link to={`/collections/${collection.slug}`} className="pl-plate group">
+                    <div className="pl-plate__frame aspect-[3/2]">
+                      <span className="pl-plate__index">{String(i + 1).padStart(2, '0')}</span>
+                      <span className="pl-plate__inset" aria-hidden />
                       {collection.coverPhoto ? (
                         <img
                           src={
-                            collection.coverPhoto.thumbnailUrl ||
-                            collection.coverPhoto.imageUrl
+                            collection.coverPhoto.thumbnailUrl || collection.coverPhoto.imageUrl
                           }
                           alt={collection.coverPhoto.altText || collection.title}
                           loading="lazy"
@@ -184,11 +186,11 @@ export function HomePage() {
                         </div>
                       )}
                     </div>
-                    <div className="pl-photo__meta">
-                      <h3 className="pl-photo__title">{collection.title}</h3>
-                      <span className="pl-photo__cat">
+                    <div className="pl-plate__meta">
+                      <h3 className="pl-plate__title">{collection.title}</h3>
+                      <p className="pl-plate__count">
                         {collection.publishedPhotoCount} photographs
-                      </span>
+                      </p>
                     </div>
                   </Link>
                 </motion.div>
@@ -197,6 +199,18 @@ export function HomePage() {
           </div>
         </section>
       )}
+
+      <section className="border-t border-[var(--color-rule)] px-6 md:px-12 py-16 md:py-20">
+        <div className="max-w-[72rem] mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+          <p className="pl-display text-[clamp(1.35rem,3vw,1.85rem)] max-w-md text-[var(--color-ink)]">
+            The archive is open — walk the full set at your own pace.
+          </p>
+          <Link to="/gallery" className="pl-btn self-start">
+            Enter gallery
+            <IconArrowRight size={14} />
+          </Link>
+        </div>
+      </section>
     </div>
   )
 }
