@@ -9,7 +9,7 @@ import { useSeoMeta } from '../hooks/useSeoMeta'
 import type { CategoriesResponse, Photo, PhotosResponse } from '../types/api'
 
 /**
- * Public gallery — editorial filters, mosaic rhythm, navigable lightbox.
+ * Public gallery — editorial filters, mosaic rhythm, count, navigable lightbox.
  */
 export function GalleryPage() {
   useSeoMeta({
@@ -20,21 +20,44 @@ export function GalleryPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [category, setCategory] = useState(searchParams.get('category') ?? '')
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [accumulated, setAccumulated] = useState<Photo[]>([])
   const categories = useApi<CategoriesResponse>('/api/categories')
 
   useEffect(() => {
     setCategory(searchParams.get('category') ?? '')
+    setPage(1)
+    setAccumulated([])
+    setActiveId(null)
   }, [searchParams])
 
   const photosPath = useMemo(() => {
-    const params = new URLSearchParams({ limit: '48' })
+    const params = new URLSearchParams({ limit: '24', page: String(page) })
     if (category) params.set('category', category)
     return `/api/photos?${params.toString()}`
-  }, [category])
+  }, [category, page])
 
   const photos = useApi<PhotosResponse>(photosPath)
-  const list = photos.data?.data ?? []
+
+  useEffect(() => {
+    if (!photos.data?.data) return
+    if (page === 1) {
+      setAccumulated(photos.data.data)
+      return
+    }
+    setAccumulated((prev) => {
+      const ids = new Set(prev.map((p) => p.id))
+      const next = photos.data!.data.filter((p) => !ids.has(p.id))
+      return [...prev, ...next]
+    })
+  }, [photos.data, page])
+
+  const list = accumulated
   const cats = categories.data?.data ?? []
+  const meta = photos.data?.meta
+  const total = meta?.total ?? list.length
+  const totalPages = meta?.totalPages ?? 1
+  const canLoadMore = page < totalPages
 
   const activeIndex = activeId ? list.findIndex((p) => p.id === activeId) : -1
   const activePhoto = activeIndex >= 0 ? list[activeIndex] : null
@@ -56,66 +79,91 @@ export function GalleryPage() {
   function selectCategory(slug: string) {
     setCategory(slug)
     setActiveId(null)
+    setPage(1)
+    setAccumulated([])
     if (slug) setSearchParams({ category: slug })
     else setSearchParams({})
   }
 
-  if (categories.loading && photos.loading) {
+  if (categories.loading && photos.loading && page === 1) {
     return <StateBlock title="Loading gallery" detail="Fetching photographs…" loading />
   }
 
-  if (photos.error) {
+  if (photos.error && list.length === 0) {
     return <StateBlock title="Unable to load gallery" detail={photos.error} />
   }
 
+  const activeCategoryName = category
+    ? cats.find((c) => c.slug === category)?.name
+    : null
+
   return (
     <div className="pl-page">
-      <div className="max-w-[72rem] mx-auto space-y-12 md:space-y-14">
+      <div className="max-w-[72rem] mx-auto space-y-14 md:space-y-16">
         <motion.header
-          className="max-w-2xl space-y-4"
-          initial={{ opacity: 0, y: 18 }}
+          className="pl-page-intro"
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           <p className="pl-kicker">Archive</p>
-          <h1 className="pl-display text-[clamp(2.25rem,5vw,3.5rem)]">All photographs</h1>
-          <p className="pl-lead max-w-lg">
+          <h1 className="pl-display">
+            {activeCategoryName ?? 'All photographs'}
+          </h1>
+          <p className="pl-lead">
             A living set of published work. Open any frame; use the arrow keys to move through the set.
           </p>
         </motion.header>
 
-        <nav
-          className="flex flex-wrap items-center gap-x-7 gap-y-3 border-b border-[var(--color-rule)] pb-1"
-          aria-label="Filter by category"
-        >
-          <FilterLink label="All" active={!category} onClick={() => selectCategory('')} />
-          {cats.map((c) => (
-            <FilterLink
-              key={c.id}
-              label={c.name}
-              active={category === c.slug}
-              onClick={() => selectCategory(c.slug)}
-            />
-          ))}
-        </nav>
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--color-rule)] pb-1">
+          <nav className="flex flex-wrap items-center gap-x-7 gap-y-3" aria-label="Filter by category">
+            <FilterLink label="All" active={!category} onClick={() => selectCategory('')} />
+            {cats.map((c) => (
+              <FilterLink
+                key={c.id}
+                label={c.name}
+                active={category === c.slug}
+                onClick={() => selectCategory(c.slug)}
+              />
+            ))}
+          </nav>
+          <p className="text-[0.62rem] tracking-[0.14em] uppercase text-[var(--color-ink-tertiary)] tabular-nums">
+            {total} {total === 1 ? 'frame' : 'frames'}
+          </p>
+        </div>
 
-        {photos.loading ? (
+        {photos.loading && list.length === 0 ? (
           <StateBlock title="Loading" detail="Updating the grid…" loading />
         ) : list.length === 0 ? (
           <StateBlock title="No photographs" detail="Nothing published in this filter yet." />
         ) : (
-          <div className="pl-mosaic">
-            {list.map((photo, i) => (
-              <PhotoCard
-                key={photo.id}
-                photo={photo}
-                preferLightbox
-                index={i}
-                onOpenLightbox={openLightbox}
-                aspect={mosaicAspect(i)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="pl-mosaic">
+              {list.map((photo, i) => (
+                <PhotoCard
+                  key={photo.id}
+                  photo={photo}
+                  preferLightbox
+                  index={i}
+                  onOpenLightbox={openLightbox}
+                  aspect={mosaicAspect(i)}
+                />
+              ))}
+            </div>
+
+            {canLoadMore && (
+              <div className="flex justify-center pt-4">
+                <button
+                  type="button"
+                  className="px-7 py-3 text-[0.68rem] tracking-[0.16em] uppercase border border-[var(--color-rule)] text-[var(--color-ink)] hover:border-[var(--color-ink)] transition-colors disabled:opacity-50"
+                  disabled={photos.loading}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  {photos.loading ? 'Loading…' : 'Load more'}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -160,8 +208,9 @@ function FilterLink({
   return (
     <button
       type="button"
+      className={`pl-filter ${active ? 'is-active' : ''}`}
       onClick={onClick}
-      className={['pl-filter', active ? 'is-active' : ''].join(' ')}
+      aria-current={active ? 'true' : undefined}
     >
       {label}
     </button>
