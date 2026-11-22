@@ -15,27 +15,18 @@ const settingsBodySchema = z.object({
   socialLinks: z.record(z.string(), z.string()).optional().nullable(),
 })
 
-/**
- * GET /api/admin/settings — full settings for the editor.
- */
 export async function adminGetSettings(_req: Request, res: Response): Promise<void> {
   const settings = await prisma.portfolioSettings.findFirst({ orderBy: { updatedAt: 'desc' } })
   if (!settings) throw httpError(404, 'Portfolio settings not found')
   res.json({ data: settings })
 }
 
-/**
- * PATCH /api/admin/settings — update site identity copy.
- * Why: Admin can edit photographer bio without redeploying the frontend.
- * What: Validates body; maps JSON null to Prisma.DbNull (required by Prisma Json fields).
- */
 export async function adminUpdateSettings(req: Request, res: Response): Promise<void> {
   const body = settingsBodySchema.parse(req.body)
 
   const existing = await prisma.portfolioSettings.findFirst({ orderBy: { updatedAt: 'desc' } })
   if (!existing) throw httpError(404, 'Portfolio settings not found')
 
-  // Prisma Json columns cannot take TypeScript `null` directly — use DbNull to clear.
   let socialLinks: Prisma.InputJsonValue | typeof Prisma.DbNull | undefined
   if (body.socialLinks === undefined) {
     socialLinks = undefined
@@ -60,32 +51,4 @@ export async function adminUpdateSettings(req: Request, res: Response): Promise<
   })
 
   res.json({ data: settings })
-}
-
-/**
- * GET /api/admin/messages — contact form inbox.
- */
-export async function adminListMessages(_req: Request, res: Response): Promise<void> {
-  const messages = await prisma.contactMessage.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 100,
-  })
-  res.json({ data: messages })
-}
-
-/**
- * PATCH /api/admin/messages/:id — mark read/unread.
- */
-export async function adminUpdateMessage(req: Request, res: Response): Promise<void> {
-  const id = String(req.params.id)
-  const body = z.object({ isRead: z.boolean() }).parse(req.body)
-
-  const existing = await prisma.contactMessage.findUnique({ where: { id } })
-  if (!existing) throw httpError(404, 'Message not found')
-
-  const message = await prisma.contactMessage.update({
-    where: { id },
-    data: { isRead: body.isRead },
-  })
-  res.json({ data: message })
 }
