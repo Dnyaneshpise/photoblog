@@ -3,31 +3,37 @@ import { z } from 'zod'
 import { prisma } from '../config/prisma.js'
 import { httpError } from '../middleware/errorHandler.js'
 
-/** Query params accepted by GET /api/photos. */
 const listQuerySchema = z.object({
   featured: z
     .enum(['true', 'false'])
     .optional()
     .transform((v) => (v === undefined ? undefined : v === 'true')),
   category: z.string().min(1).optional(),
+  location: z.string().min(1).max(120).optional(),
+  sort: z.enum(['editorial', 'newest', 'oldest', 'title']).default('editorial'),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(24),
 })
 
-/**
- * Reads a single path param as a string.
- * Why: Express types params as string | string[]; Prisma expects string.
- */
 function paramString(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value[0] ?? ''
   return value ?? ''
 }
 
-/**
- * GET /api/photos
- * Why: Powers the public gallery and homepage featured strip.
- * What: Returns only published photos, optional featured/category filters, paginated.
- */
+function orderByForSort(sort: z.infer<typeof listQuerySchema>['sort']) {
+  switch (sort) {
+    case 'newest':
+      return [{ createdAt: 'desc' as const }]
+    case 'oldest':
+      return [{ createdAt: 'asc' as const }]
+    case 'title':
+      return [{ title: 'asc' as const }]
+    case 'editorial':
+    default:
+      return [{ sortOrder: 'asc' as const }, { createdAt: 'desc' as const }]
+  }
+}
+
 export async function listPhotos(req: Request, res: Response): Promise<void> {
   const query = listQuerySchema.parse(req.query)
 
@@ -35,25 +41,23 @@ export async function listPhotos(req: Request, res: Response): Promise<void> {
     isPublished: boolean
     isFeatured?: boolean
     category?: { slug: string }
+    location?: { contains: string; mode: 'insensitive' }
   } = {
     isPublished: true,
   }
 
-  if (query.featured !== undefined) {
-    where.isFeatured = query.featured
-  }
-
-  if (query.category) {
-    where.category = { slug: query.category }
-  }
+  if (query.featured !== undefined) where.isFeatured = query.featured
+  if (query.category) where.category = { slug: query.category }
+  if (query.location) where.location = { contains: query.location, mode: 'insensitive' }
 
   const skip = (query.page - 1) * query.limit
+  const orderBy = orderByForSort(query.sort)
 
   const [total, photos] = await Promise.all([
     prisma.photo.count({ where }),
     prisma.photo.findMany({
       where,
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+      orderBy,
       skip,
       take: query.limit,
       include: {
@@ -69,15 +73,16 @@ export async function listPhotos(req: Request, res: Response): Promise<void> {
       limit: query.limit,
       total,
       totalPages: Math.ceil(total / query.limit) || 1,
+      sort: query.sort,
+      filters: {
+        featured: query.featured ?? null,
+        category: query.category ?? null,
+        location: query.location ?? null,
+      },
     },
   })
 }
 
-/**
- * GET /api/photos/:id
- * Why: Single-photo view / lightbox needs full metadata for one published image.
- * What: Looks up by id; returns 404 if missing or not published (hides drafts).
- */
 export async function getPhotoById(req: Request, res: Response): Promise<void> {
   const id = paramString(req.params.id)
 
@@ -95,18 +100,10 @@ export async function getPhotoById(req: Request, res: Response): Promise<void> {
     },
   })
 
-  if (!photo) {
-    throw httpError(404, 'Photo not found')
-  }
-
+  if (!photo) throw httpError(404, 'Photo not found')
   res.json({ data: photo })
 }
 
-/**
- * GET /api/categories
- * Why: Gallery filters need the list of categories without hardcoding names in the UI.
- * What: Returns all categories ordered by name with published photo counts.
- */
 export async function listCategories(_req: Request, res: Response): Promise<void> {
   const categories = await prisma.category.findMany({
     orderBy: { name: 'asc' },
@@ -125,5 +122,19 @@ export async function listCategories(_req: Request, res: Response): Promise<void
       slug: c.slug,
       publishedPhotoCount: c._count.photos,
     })),
+  })
+}
+
+export async function listLocations(_req: Request, res: Response): Promise<void> {
+  const rows = await prisma.photo.findMany({
+    where: { isPublished: true, location: { not: null } },
+    select: { location: true },
+    distinct: ['location'],
+    orderBy: { location: 'asc' },
+    take: 100,
+  })
+
+  res.json({
+    data: rows.map((r) => r.location).filter((v): v is string => Boolean(v && v.trim())),
   })
 }
