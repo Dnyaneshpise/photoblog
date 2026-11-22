@@ -14,20 +14,67 @@ const photoBodySchema = z.object({
   width: z.number().int().positive().optional().nullable(),
   height: z.number().int().positive().optional().nullable(),
   location: z.string().trim().max(200).optional().nullable(),
+  capturedAt: z.coerce.date().optional().nullable(),
   isFeatured: z.boolean().optional(),
   isPublished: z.boolean().optional(),
   sortOrder: z.number().int().optional(),
   categoryId: z.string().optional().nullable(),
 })
 
-export async function adminListPhotos(_req: Request, res: Response): Promise<void> {
-  const photos = await prisma.photo.findMany({
-    orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
-    include: {
-      category: { select: { id: true, name: true, slug: true } },
+export async function adminListPhotos(req: Request, res: Response): Promise<void> {
+  const query = z
+    .object({
+      q: z.string().trim().max(80).optional(),
+      published: z
+        .enum(['true', 'false'])
+        .optional()
+        .transform((v) => (v === undefined ? undefined : v === 'true')),
+      featured: z
+        .enum(['true', 'false'])
+        .optional()
+        .transform((v) => (v === undefined ? undefined : v === 'true')),
+      categoryId: z.string().optional(),
+      page: z.coerce.number().int().min(1).default(1),
+      limit: z.coerce.number().int().min(1).max(100).default(40),
+    })
+    .parse(req.query)
+
+  const where: Record<string, unknown> = {}
+  if (query.published !== undefined) where.isPublished = query.published
+  if (query.featured !== undefined) where.isFeatured = query.featured
+  if (query.categoryId) where.categoryId = query.categoryId
+  if (query.q) {
+    where.OR = [
+      { title: { contains: query.q, mode: 'insensitive' } },
+      { location: { contains: query.q, mode: 'insensitive' } },
+      { description: { contains: query.q, mode: 'insensitive' } },
+    ]
+  }
+
+  const skip = (query.page - 1) * query.limit
+  const [total, photos] = await Promise.all([
+    prisma.photo.count({ where }),
+    prisma.photo.findMany({
+      where,
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+      skip,
+      take: query.limit,
+      include: {
+        category: { select: { id: true, name: true, slug: true } },
+        _count: { select: { collections: true } },
+      },
+    }),
+  ])
+
+  res.json({
+    data: photos,
+    meta: {
+      page: query.page,
+      limit: query.limit,
+      total,
+      totalPages: Math.ceil(total / query.limit) || 1,
     },
   })
-  res.json({ data: photos })
 }
 
 export async function adminCreatePhoto(req: Request, res: Response): Promise<void> {
@@ -44,6 +91,7 @@ export async function adminCreatePhoto(req: Request, res: Response): Promise<voi
       width: body.width ?? null,
       height: body.height ?? null,
       location: body.location ?? null,
+      capturedAt: body.capturedAt ?? null,
       isFeatured: body.isFeatured ?? false,
       isPublished: body.isPublished ?? false,
       sortOrder: body.sortOrder ?? 0,
@@ -73,6 +121,7 @@ export async function adminUpdatePhoto(req: Request, res: Response): Promise<voi
       thumbnailUrl: body.thumbnailUrl === undefined ? undefined : body.thumbnailUrl,
       storageKey: body.storageKey === undefined ? undefined : body.storageKey,
       location: body.location === undefined ? undefined : body.location,
+      capturedAt: body.capturedAt === undefined ? undefined : body.capturedAt,
       categoryId: body.categoryId === undefined ? undefined : body.categoryId,
     },
     include: {
@@ -83,10 +132,6 @@ export async function adminUpdatePhoto(req: Request, res: Response): Promise<voi
   res.json({ data: photo })
 }
 
-/**
- * DELETE /api/admin/photos/:id
- * Why: Remove portfolio row and, when possible, the Cloudinary binary.
- */
 export async function adminDeletePhoto(req: Request, res: Response): Promise<void> {
   const id = String(req.params.id)
   const existing = await prisma.photo.findUnique({ where: { id } })
@@ -98,4 +143,78 @@ export async function adminDeletePhoto(req: Request, res: Response): Promise<voi
 
   await prisma.photo.delete({ where: { id } })
   res.json({ data: { ok: true } })
+}
+
+const bulkSchema = z.object({
+  ids: z.array(z.string().min(1)).min(1).max(100),
+  action: z.enum([
+    'publish',
+    'unpublish',
+    'feature',
+    'unfeature',
+    'delete',
+    'setCategory',
+  ]),
+  categoryId: z.string().nullable().optional(),
+})
+
+export async function adminBulkPhotos(req: Request, res: Response): Promise<void> {
+  const body = bulkSchema.parse(req.body)
+  const { ids, action } = body
+
+  if (action === 'delete') {
+    const rows = await prisma.photo.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, storageKey: true },
+    })
+    await Promise.all(
+      rows.filter((r) => r.storageKey).map((r) => destroyImage(r.storageKey as string)),
+    )
+    const result = await prisma.photo.deleteMany({ where: { id: { in: ids } } })
+    res.json({ data: { action, affected: result.count } })
+    return
+  }
+
+  if (action === 'setCategory') {
+    const result = await prisma.photo.updateMany({
+      where: { id: { in: ids } },
+      data: { categoryId: body.categoryId ?? null },
+    })
+    res.json({ data: { action, affected: result.count } })
+    return
+  }
+
+  const data =
+    action === 'publish'
+      ? { isPublished: true }
+      : action === 'unpublish'
+        ? { isPublished: false }
+        : action === 'feature'
+          ? { isFeatured: true }
+          : { isFeatured: false }
+
+  const result = await prisma.photo.updateMany({
+    where: { id: { in: ids } },
+    data,
+  })
+  res.json({ data: { action, affected: result.count } })
+}
+
+const reorderSchema = z.object({
+  orderedIds: z.array(z.string().min(1)).min(1).max(500),
+})
+
+export async function adminReorderPhotos(req: Request, res: Response): Promise<void> {
+  const body = reorderSchema.parse(req.body)
+
+  await prisma.$transaction(
+    body.orderedIds.map((id, index) =>
+      prisma.photo.update({
+        where: { id },
+        data: { sortOrder: index + 1 },
+      }),
+    ),
+  )
+
+  res.json({ data: { ok: true, count: body.orderedIds.length } })
 }
