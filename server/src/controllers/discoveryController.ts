@@ -24,6 +24,23 @@ const photoCardSelect = {
   category: { select: { id: true, name: true, slug: true } },
 } as const
 
+/** Subset returned by photoCardSelect — not a full Prisma Photo row. */
+type PhotoCard = {
+  id: string
+  title: string
+  description: string | null
+  altText: string | null
+  imageUrl: string
+  thumbnailUrl: string | null
+  width: number | null
+  height: number | null
+  location: string | null
+  capturedAt: Date | null
+  isFeatured: boolean
+  sortOrder: number
+  category: { id: string; name: string; slug: string } | null
+}
+
 export async function getRandomPhotos(req: Request, res: Response): Promise<void> {
   const limit = Math.min(Math.max(Number(req.query.limit) || 1, 1), 12)
   const total = await prisma.photo.count({ where: { isPublished: true } })
@@ -135,7 +152,7 @@ export async function getRelatedPhotos(req: Request, res: Response): Promise<voi
   })
   if (!current) throw httpError(404, 'Photo not found')
   const collectionIds = current.collections.map((c) => c.collectionId)
-  const picked = new Map<string, Awaited<ReturnType<typeof prisma.photo.findMany>>[number]>()
+  const picked = new Map<string, PhotoCard>()
   if (collectionIds.length > 0) {
     const inSeries = await prisma.photo.findMany({
       where: {
